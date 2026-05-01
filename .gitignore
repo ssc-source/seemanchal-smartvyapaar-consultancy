@@ -1,0 +1,44 @@
+# dependencies
+backend/node_modules/
+frontend/node_modules/
+backend/.env
+frontend/.env
+frontend/.next/
+backend/dist/
+frontend/dist/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+coverage/
+
+# next.js
+**/.next
+out/
+
+# production
+build/
+dist/
+
+# env
+**/.env
+**/.env.*
+.env*
+.env.local
+
+# misc
+.DS_Store
+*.pem
+*.log
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
