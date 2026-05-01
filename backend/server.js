@@ -50,6 +50,12 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'API is running' });
 });
 
+//handle server errors externally
+
+app.get("/", (req, res) => {
+  res.send("RJ Concept Backend is Running 🚀");
+});
+
 // Handle unhandled routes (404) with JSON
 app.use((req, res, next) => {
   res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
