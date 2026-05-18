@@ -6,7 +6,7 @@ export const siteConfig = {
   logo: "/assets/Logo.png",
   ogImage: "/assets/Logo.png",
   links: {
-    twitter: "https://twitter.com/",
+    twitter: "https://www.instagram.com/seemanchalsmartvyapaar/",
     facebook: "https://facebook.com/",
     linkedin: "https://seemanchal-smartvyapaar-consultancy.vercel.app/",
   },
