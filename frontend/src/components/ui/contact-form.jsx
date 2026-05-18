@@ -1,68 +1,110 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { api } from "@/lib/api";
 import { Loader2, CheckCircle2 } from "lucide-react";
 
-const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  phone: z.string().optional(),
-  company: z.string().optional(),
-  businessType: z.string().optional(),
-  projectGoal: z.string().optional(),
-  urgency: z.string().optional(),
-  serviceOfInterest: z.string().optional(),
-  message: z.string().min(10, "Message must be at least 10 characters"),
-});
+// ═══════════════════════════════════════════════════════════════════════
+// CONTACT FORM - Production-Ready Implementation
+// ═══════════════════════════════════════════════════════════════════════
+
+if (typeof window !== 'undefined') {
+  console.log('═══════════════════════════════════════════════════════════');
+  console.log('🔵 [ContactForm] Component Module Loaded');
+  console.log('═══════════════════════════════════════════════════════════');
+  console.log('API_BASE_URL:', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000');
+  console.log('Environment:', process.env.NODE_ENV);
+  console.log('Timestamp:', new Date().toISOString());
+  console.log('═══════════════════════════════════════════════════════════');
+}
+
+// Controlled form initial schema (no external validators)
 
 export function ContactForm({ services }) {
+  console.log('🟢 [ContactForm] Component rendering. Services:', services?.length || 0);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  // Controlled form state
+  const initialState = {
+    name: "",
+    email: "",
+    phone: "",
+    company: "",
+    businessType: "",
+    projectGoal: "",
+    urgency: "",
+    serviceOfInterest: "",
+    message: "",
+  };
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(formSchema),
-  });
+  const [formData, setFormData] = useState(initialState);
 
-  const onSubmit = async (data) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const submitForm = async () => {
+    console.log('\n' + '█'.repeat(60));
+    console.log('📝 [ContactForm] Controlled submit flow starting');
+    console.log('█'.repeat(60));
+    console.log('Form data received:', {
+      keys: Object.keys(formData),
+      name: formData.name,
+      email: formData.email,
+      timestamp: new Date().toISOString()
+    });
+
     setIsSubmitting(true);
     setErrorMsg("");
-    try {
-      // Format extended qualification data into the message field
-      const extendedMessage = `
-[Qualification Data]
-Business Type: ${data.businessType || 'Not specified'}
-Project Goal: ${data.projectGoal || 'Not specified'}
-Urgency: ${data.urgency || 'Not specified'}
 
-[Original Message]
-${data.message}
-      `.trim();
+    try {
+      const extendedMessage = `\n[Qualification Data]\nBusiness Type: ${formData.businessType || 'Not specified'}\nProject Goal: ${formData.projectGoal || 'Not specified'}\nUrgency: ${formData.urgency || 'Not specified'}\n\n[Original Message]\n${formData.message}`.trim();
 
       const payload = {
-        ...data,
+        ...formData,
         message: extendedMessage
       };
 
-      await api.submitInquiry(payload);
+      console.log('📤 [ContactForm] Calling api.submitInquiry...');
+
+      const response = await api.submitInquiry(payload);
+
+      console.log('✅ [ContactForm] API SUCCESS!', {
+        success: response.success,
+        leadId: response.leadId
+      });
+
       setIsSuccess(true);
-      reset();
+      setFormData(initialState);
+      console.log('✨ [ContactForm] Success state activated, form cleared');
+      console.log('█'.repeat(60) + '\n');
     } catch (error) {
-      setErrorMsg(error.message || "Failed to connect to the server. Please try again later.");
+      console.error('❌ [ContactForm] SUBMISSION FAILED', {
+        message: error.message,
+        timestamp: new Date().toISOString()
+      });
+      setErrorMsg(error.message || "Failed to submit inquiry. Please try again.");
     } finally {
       setIsSubmitting(false);
+      console.log('🏁 [ContactForm] Form submission complete');
     }
   };
 
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    await submitForm();
+  };
+
+  const handleButtonClick = async (e) => {
+    e.preventDefault();
+    console.log('📝 [ContactForm] Button click intercept fired');
+    await submitForm();
+  };
+
+  // Render success state
   if (isSuccess) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
@@ -79,8 +121,9 @@ ${data.message}
     );
   }
 
+  // Render controlled form
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={onSubmit} className="space-y-6">
       {errorMsg && (
         <div className="p-4 bg-red-50 text-red-600 rounded-lg text-sm border border-red-200">
           {errorMsg}
@@ -90,39 +133,47 @@ ${data.message}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <label className="text-sm font-medium">Full Name *</label>
-          <input 
-            {...register("name")} 
-            className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" 
+          <input
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             placeholder="Your Name"
           />
-          {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Email Address *</label>
-          <input 
-            {...register("email")} 
+          <input
+            name="email"
             type="email"
-            className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" 
+            value={formData.email}
+            onChange={handleChange}
+            required
+            className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             placeholder="Your Email"
           />
-          {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <label className="text-sm font-medium">Phone Number</label>
-          <input 
-            {...register("phone")} 
-            className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" 
+          <input
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             placeholder="Your Phone Number"
           />
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Company / Organization</label>
-          <input 
-            {...register("company")} 
-            className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" 
+          <input
+            name="company"
+            value={formData.company}
+            onChange={handleChange}
+            className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             placeholder="Your Business Name"
           />
         </div>
@@ -131,8 +182,10 @@ ${data.message}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <label className="text-sm font-medium">Business Type</label>
-          <select 
-            {...register("businessType")}
+          <select
+            name="businessType"
+            value={formData.businessType}
+            onChange={handleChange}
             className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="">Select industry...</option>
@@ -147,8 +200,10 @@ ${data.message}
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Project Goal</label>
-          <select 
-            {...register("projectGoal")}
+          <select
+            name="projectGoal"
+            value={formData.projectGoal}
+            onChange={handleChange}
             className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="">Select primary goal...</option>
@@ -163,8 +218,10 @@ ${data.message}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <label className="text-sm font-medium">Service of Interest</label>
-          <select 
-            {...register("serviceOfInterest")}
+          <select
+            name="serviceOfInterest"
+            value={formData.serviceOfInterest}
+            onChange={handleChange}
             className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="">Select a service...</option>
@@ -175,8 +232,10 @@ ${data.message}
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Urgency</label>
-          <select 
-            {...register("urgency")}
+          <select
+            name="urgency"
+            value={formData.urgency}
+            onChange={handleChange}
             className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="">Select timeline...</option>
@@ -190,17 +249,20 @@ ${data.message}
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Your Message *</label>
-        <textarea 
-          {...register("message")} 
+        <textarea
+          name="message"
+          value={formData.message}
+          onChange={handleChange}
           rows={4}
-          className="w-full flex min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" 
+          required
+          className="w-full flex min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           placeholder="Tell us about your project requirements..."
         />
-        {errors.message && <p className="text-xs text-red-500">{errors.message.message}</p>}
       </div>
 
       <button 
-        type="submit" 
+        type="submit"
+        onClick={handleButtonClick}
         disabled={isSubmitting}
         className="w-full bg-brand-primary text-white h-12 rounded-md font-medium hover:bg-brand-primary/90 transition-colors flex items-center justify-center disabled:opacity-70"
       >

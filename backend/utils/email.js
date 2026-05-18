@@ -1,16 +1,8 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.example.com',
-    port: process.env.SMTP_PORT || 587,
-    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-};
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+console.log('🟧 [Email] Module loaded. Resend API key configured:', !!process.env.RESEND_API_KEY);
 
 const getAdminEmailTemplate = (data) => {
   return `
@@ -65,30 +57,48 @@ const getAdminEmailTemplate = (data) => {
 };
 
 exports.sendAdminNotification = async (leadData) => {
-  if (process.env.SMTP_DISABLED === 'true') {
-    console.log('Email sending is disabled. Lead Data:', leadData);
-    return true;
+  console.log('🟧 [Email] sendAdminNotification called', {
+    name: leadData.name,
+    email: leadData.email,
+    timestamp: new Date().toISOString()
+  });
+
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('🟨 [Email] Resend API key not configured. Email will not be sent.');
+    return false;
   }
 
   try {
-    const transporter = createTransporter();
-    
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
-    const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER || 'no-reply@example.com';
+    const emailFrom = process.env.EMAIL_FROM || 'SSC Website <onboarding@resend.dev>';
     
-    const info = await transporter.sendMail({
-      from: `"SSC Website" <${fromEmail}>`,
+    console.log('🟧 [Email] Sending email via Resend', {
+      from: emailFrom,
+      to: adminEmail,
+      subject: `New Lead: ${leadData.name}`,
+      timestamp: new Date().toISOString()
+    });
+    
+    const result = await resend.emails.send({
+      from: emailFrom,
       to: adminEmail,
       replyTo: leadData.email,
       subject: `New Lead: ${leadData.name} - ${leadData.serviceOfInterest || 'General Inquiry'}`,
       html: getAdminEmailTemplate(leadData),
     });
 
-    console.log('Admin notification sent:', info.messageId);
+    if (result.error) {
+      console.error('🟥 [Email] Resend API error:', result.error);
+      return false;
+    }
+
+    console.log('🟢 [Email] Email sent successfully via Resend', {
+      emailId: result.id,
+      timestamp: new Date().toISOString()
+    });
     return true;
   } catch (error) {
-    console.error('Error sending admin email notification:', error);
-    // Don't throw, we don't want to break the inquiry submission flow
+    console.error('🟥 [Email] Exception in sendAdminNotification:', error.message);
     return false;
   }
 };
