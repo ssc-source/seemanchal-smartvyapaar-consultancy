@@ -122,6 +122,11 @@ app.use(
   require('./routes/careerApplications')
 );
 
+app.use(
+  '/api/community-applications',
+  require('./routes/communityApplications')
+);
+
 app.use('/api/services', require('./routes/services'));
 
 app.use('/api/projects', require('./routes/projects'));

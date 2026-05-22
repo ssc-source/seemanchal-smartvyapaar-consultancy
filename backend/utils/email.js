@@ -158,3 +158,69 @@ exports.sendCareerApplicationEmail = async (data) => {
     return false;
   }
 };
+
+exports.sendCommunityApplicationEmail = async (data) => {
+
+  try {
+
+    console.log("🟧 Sending SSC Community Email");
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+
+        <h2 style="color:#2563eb;">
+          New SSC Community Join Request
+        </h2>
+
+        <hr />
+
+        <p><strong>Full Name:</strong> ${data.fullName}</p>
+
+        <p><strong>Email:</strong> ${data.email}</p>
+
+        <p><strong>Phone:</strong> ${data.phone}</p>
+
+        <p><strong>Location:</strong> ${data.location}</p>
+
+        <p><strong>Profession:</strong> ${data.profession}</p>
+
+        <p><strong>Skills:</strong> ${data.skills}</p>
+
+        <p><strong>LinkedIn:</strong> ${data.linkedin}</p>
+
+        <p><strong>GitHub:</strong> ${data.github}</p>
+
+        <hr />
+
+        <h3>Why Join SSC Community?</h3>
+
+        <p>${data.reason}</p>
+
+      </div>
+    `;
+
+    const response = await resend.emails.send({
+
+      from: process.env.EMAIL_FROM,
+
+      to: process.env.ADMIN_EMAIL,
+
+      subject: `New SSC Community Join Request - ${data.fullName}`,
+
+      html,
+
+    });
+
+    console.log("🟢 Community Email Sent:", response);
+
+    return true;
+
+  } catch (error) {
+
+    console.error("❌ Community Email Error:", error);
+
+    return false;
+
+  }
+
+};

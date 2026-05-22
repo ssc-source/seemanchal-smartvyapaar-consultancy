@@ -143,4 +143,31 @@ export const api = {
 
   return result;
 },
+
+async submitCommunityApplication(data) {
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/community-applications`,
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify(data),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Failed to submit community application"
+    );
+  }
+
+  return result;
+},
+
 };

@@ -1,5 +1,5 @@
 "use client";
-
+import CommunityApplication from "@/components/community/communityapplication";
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -360,132 +360,27 @@ export default function CommunityPage() {
       {/* JOIN FORM */}
       {/* ------------------------------------------------------------------ */}
 
-      <section
-        id="join"
-        className="bg-linear-to-b from-slate-50 to-white border-t border-slate-200/70 py-24 px-6"
-      >
+      <section id="join-community" className="py-24 px-6">
 
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
 
           <div className="text-center mb-16">
 
             <h2 className="text-5xl font-bold text-slate-900 mb-6">
-              Join The SSC Community
+              Become Part Of SSC
             </h2>
 
             <p className="text-xl text-slate-500 max-w-3xl mx-auto">
-              Become part of a collaborative ecosystem focused on
-              technology, innovation, startups, and digital growth.
+              Collaborate, network, learn, and build with ambitious people.
             </p>
+
           </div>
 
-          {submitted ? (
-            <div className="rounded-[32px] border border-slate-200 bg-white p-20 text-center shadow-xl">
+          <CommunityApplication />
 
-              <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-green-100">
-                <Send className="h-10 w-10 text-green-600" />
-              </div>
-
-              <h3 className="text-5xl font-bold text-slate-900 mb-6">
-                Request Submitted
-              </h3>
-
-              <p className="text-xl text-slate-500 leading-relaxed max-w-2xl mx-auto">
-                Thank you for joining the SSC Community.
-                Our team will connect with you soon.
-              </p>
-            </div>
-          ) : (
-            <form
-              onSubmit={handleSubmit}
-              className="rounded-[32px] border border-slate-200 bg-white p-10 md:p-14 shadow-xl space-y-8"
-            >
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3">
-                    Full Name
-                  </label>
-
-                  <input
-                    type="text"
-                    required
-                    placeholder="Enter your name"
-                    className="w-full rounded-2xl border border-slate-300 px-5 py-4 outline-none focus:border-brand-accent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3">
-                    Email Address
-                  </label>
-
-                  <input
-                    type="email"
-                    required
-                    placeholder="Enter your email"
-                    className="w-full rounded-2xl border border-slate-300 px-5 py-4 outline-none focus:border-brand-accent"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3">
-                    Your Role
-                  </label>
-
-                  <select className="w-full rounded-2xl border border-slate-300 px-5 py-4 outline-none focus:border-brand-accent">
-                    <option>Student</option>
-                    <option>Developer</option>
-                    <option>Founder</option>
-                    <option>Designer</option>
-                    <option>Business Owner</option>
-                    <option>Creator</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3">
-                    Interested In
-                  </label>
-
-                  <select className="w-full rounded-2xl border border-slate-300 px-5 py-4 outline-none focus:border-brand-accent">
-                    <option>Technology</option>
-                    <option>Startups</option>
-                    <option>AI & Automation</option>
-                    <option>Community Events</option>
-                    <option>Internships</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-3">
-                  Tell Us About Yourself
-                </label>
-
-                <textarea
-                  rows={6}
-                  placeholder="Your goals, interests, skills, startup ideas, etc."
-                  className="w-full resize-none rounded-2xl border border-slate-300 px-5 py-4 outline-none focus:border-brand-accent"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="inline-flex items-center gap-2 rounded-2xl bg-brand-accent px-8 py-5 text-lg font-semibold text-white hover:opacity-90 transition-all"
-              >
-                Join Community
-                <ArrowRight className="h-5 w-5" />
-              </button>
-            </form>
-          )}
         </div>
-      </section>
 
+      </section>
       {/* ------------------------------------------------------------------ */}
       {/* FINAL CTA */}
       {/* ------------------------------------------------------------------ */}
