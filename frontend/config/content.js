@@ -192,11 +192,11 @@ export const content = {
   footer: {
     description: "Empowering businesses and institutions with premium digital infrastructure. We engineer your operational scale.",
     quickLinks: [
-      { label: "Home", href: "/" },
       { label: "Platform Overview", href: "/about" },
       { label: "Our Systems", href: "/services" },
       { label: "Case Studies", href: "/projects" },
       { label: "Book Consultation", href: "/contact" },
+      { label: "Community", href: "/community" },
     ],
     legal: [
       { label: "Privacy Policy", href: "/privacy" },
@@ -232,3 +232,5 @@ export const content = {
     modifications: "We reserve the right to modify these terms at any time. Any changes will be effective immediately upon posting on our website. Your continued use of our services after any changes constitutes your acceptance of the new terms."
   }
 };
+
+

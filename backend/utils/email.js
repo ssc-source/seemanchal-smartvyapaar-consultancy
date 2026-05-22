@@ -102,3 +102,59 @@ exports.sendAdminNotification = async (leadData) => {
     return false;
   }
 };
+
+exports.sendCareerApplicationEmail = async (data) => {
+  try {
+    console.log("🟧 [Career Email] Sending application email");
+
+    const html = `
+      <div style="font-family: Arial; padding: 20px;">
+        <h2>New Career Application</h2>
+
+        <p><strong>Full Name:</strong> ${data.fullName}</p>
+        <p><strong>Email:</strong> ${data.email}</p>
+        <p><strong>Phone:</strong> ${data.phone}</p>
+        <p><strong>Location:</strong> ${data.location}</p>
+
+        <hr />
+
+        <p><strong>College:</strong> ${data.college}</p>
+        <p><strong>Degree:</strong> ${data.degree}</p>
+        <p><strong>Graduation Year:</strong> ${data.graduationYear}</p>
+
+        <hr />
+
+        <p><strong>Applying For:</strong> ${data.role}</p>
+        <p><strong>Internship Type:</strong> ${data.internshipType}</p>
+
+        <hr />
+
+        <p><strong>GitHub:</strong> ${data.github}</p>
+        <p><strong>LinkedIn:</strong> ${data.linkedin}</p>
+        <p><strong>Portfolio:</strong> ${data.portfolio}</p>
+
+        <hr />
+
+        <h3>Projects / Experience</h3>
+        <p>${data.experience}</p>
+
+        <h3>Why Join SSC?</h3>
+        <p>${data.whyJoin}</p>
+      </div>
+    `;
+
+    const response = await resend.emails.send({
+      from: process.env.EMAIL_FROM,
+      to: process.env.ADMIN_EMAIL,
+      subject: `New Career Application - ${data.fullName}`,
+      html,
+    });
+
+    console.log("🟢 Career Application Email Sent:", response);
+
+    return true;
+  } catch (error) {
+    console.error("Career Email Error:", error);
+    return false;
+  }
+};

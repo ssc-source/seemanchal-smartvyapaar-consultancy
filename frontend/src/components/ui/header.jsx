@@ -39,7 +39,7 @@ export async function Header() {
             href="/projects"
             className="text-slate-600 transition-colors hover:text-brand-accent"
           >
-            Projects
+            Use Cases
           </Link>
           <Link
             href="/about"
@@ -47,6 +47,20 @@ export async function Header() {
           >
             About
           </Link>
+          <Link
+            href="/blog"
+            className="text-slate-600 transition-colors hover:text-brand-accent"
+          >
+            Blog
+          </Link>
+          <Link
+            href="/career"
+            className="text-slate-600 transition-colors hover:text-brand-accent"
+          >
+            Careers
+          </Link>
+          
+
         </nav>
 
         <div className="flex items-center gap-4">
