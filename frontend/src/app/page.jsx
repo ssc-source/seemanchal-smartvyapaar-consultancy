@@ -1,6 +1,8 @@
 import { contentAdapter } from "@/lib/contentAdapter";
 import { CTA } from "@/components/ui/cta";
 import { Globe, GraduationCap, Share2, Briefcase, Palette, TrendingUp, LifeBuoy, CheckCircle2, Coffee, Settings } from "lucide-react";
+import TechStackMotion from "@/components/home/tech-stack-motion";
+import WorkflowMotion from "@/components/home/workflow-motion";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -15,6 +17,18 @@ const iconMap = {
   Coffee,
   Settings,
 };
+
+import {
+  Code2,
+  Database,
+  Cloud,
+  Cpu,
+  ShieldCheck,
+  Workflow,
+  Rocket,
+  Layers3,
+  ArrowRight,
+} from "lucide-react";
 
 export default async function Home() {
   const pageData = await contentAdapter.resolveHomepage();
@@ -64,6 +78,10 @@ export default async function Home() {
           ))}
         </div>
       </section>
+
+      {/* technology stack section */}
+
+      <TechStackMotion />
 
       {/* ─── Use Cases Section ─── */}
       <section className="w-full bg-slate-50/60 py-16 md:py-24 mt-16">
@@ -128,6 +146,10 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* ─── Workflow Animation Section ─── */}
+
+      <WorkflowMotion />
 
       {/* ─── Projects Section ─── */}
       <section className="w-full bg-slate-50/60 py-24">

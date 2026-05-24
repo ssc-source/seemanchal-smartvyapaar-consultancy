@@ -7,6 +7,7 @@
   --color-brand-light: #f8fafc;
 }
 
+
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
@@ -62,4 +63,23 @@ body {
   right: 0;
   height: 1px;
   background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+/* Hide scrollbar */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

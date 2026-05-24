@@ -16,7 +16,7 @@ const blogs = [
     title: "How AI Will Transform Regional Businesses in India",
     excerpt:
       "Discover how AI-powered systems, automation, and smart workflows are reshaping local businesses and institutions across Tier-2 and Tier-3 India.",
-    image: "/images/blogs/ai-business.jpg",
+    image: "/blogs/AIinbusiness.jpeg",
     category: "Artificial Intelligence",
     readTime: "6 min read",
     date: "May 2026",
@@ -26,7 +26,7 @@ const blogs = [
     title: "Why Schools & Institutes Need Modern ERP Systems",
     excerpt:
       "Manual administration slows growth. Learn how modern ERP systems improve operations, communication, fees, attendance, and management efficiency.",
-    image: "/images/blogs/school-erp.jpg",
+    image: "/blogs/ERPdashboard.png",
     category: "ERP Solutions",
     readTime: "5 min read",
     date: "May 2026",
@@ -36,7 +36,7 @@ const blogs = [
     title: "Digital Branding Strategies for Restaurants & Cafes",
     excerpt:
       "From QR ordering systems to social branding and customer engagement — explore how restaurants can scale digitally.",
-    image: "/images/blogs/restaurant-branding.jpg",
+    image: "/blogs/modernwebdevelopment.jpg",
     category: "Business Growth",
     readTime: "4 min read",
     date: "April 2026",
@@ -46,7 +46,7 @@ const blogs = [
     title: "The Future of SaaS Startups in Bharat",
     excerpt:
       "India’s next SaaS revolution is emerging from regional ecosystems. Learn why localized digital infrastructure is the next big opportunity.",
-    image: "/images/blogs/saas-bharat.jpg",
+    image: "/blogs/cloudcomputing.webp",
     category: "Startups",
     readTime: "7 min read",
     date: "April 2026",
@@ -56,7 +56,7 @@ const blogs = [
     title: "Why Every Business Needs a Professional Website",
     excerpt:
       "A modern business website builds trust, authority, leads, and long-term digital visibility for any organization.",
-    image: "/images/blogs/business-website.jpg",
+    image: "/blogs/modernwebdevelopment.jpg",
     category: "Web Development",
     readTime: "5 min read",
     date: "March 2026",
@@ -66,7 +66,7 @@ const blogs = [
     title: "Automation Systems for Small & Medium Businesses",
     excerpt:
       "Learn how automation can save time, reduce operational costs, and improve customer experience across industries.",
-    image: "/images/blogs/automation.jpg",
+    image: "/blogs/cloudcomputing.webp",
     category: "Automation",
     readTime: "6 min read",
     date: "March 2026",

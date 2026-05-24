@@ -63,8 +63,18 @@ export async function Header() {
 
         </nav>
 
-        <div className="flex items-center gap-4">
+        {/* <div className="flex items-center gap-4">
           <CTA label="Get in Touch" href="/contact" size="sm" icon={false} />
+        </div> */}
+        <div className="flex items-center gap-4 shrink-0">
+          <div className="whitespace-nowrap">
+            <CTA
+              label="Get in Touch"
+              href="/contact"
+              size="sm"
+              icon={false}
+            />
+          </div>
         </div>
       </div>
     </header>

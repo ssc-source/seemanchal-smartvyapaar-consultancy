@@ -91,7 +91,7 @@ exports.sendAdminNotification = async (leadData) => {
       console.error('🟥 [Email] Resend API error:', result.error);
       return false;
     }
-
+    
     console.log('🟢 [Email] Email sent successfully via Resend', {
       emailId: result.id,
       timestamp: new Date().toISOString()
