@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 
+
 /* -------------------------------------------------------------------------- */
 /*                              COMMUNITY DATA                                */
 /* -------------------------------------------------------------------------- */
@@ -133,7 +134,7 @@ export default function CommunityPage() {
             <div className="mt-12 flex flex-wrap gap-5">
 
               <a
-                href="#join"
+                href="#join-community"
                 className="inline-flex items-center gap-2 rounded-2xl bg-brand-accent px-8 py-4 text-white font-semibold shadow-lg hover:scale-[1.02] transition-all"
               >
                 Join Community

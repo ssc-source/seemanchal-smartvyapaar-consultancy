@@ -180,20 +180,7 @@ export default function TechStackMotion() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             viewport={{ once: true }}
-            className="
-              inline-flex items-center
-              rounded-full
-              border border-blue-200
-              bg-white/80
-              backdrop-blur-md
-              px-4 py-2
-              text-[11px] sm:text-sm
-              font-semibold
-              tracking-[0.2em]
-              uppercase
-              text-blue-700
-              shadow-sm
-            "
+            className= "inline-flex items-center rounded-full border border-blue-200 bg-white/80 backdrop-blur-md px-4 py-2 text-[11px] sm:text-sm font-semibold tracking-[0.2em] uppercase text-blue-700 shadow-sm"
           >
             Technologies We Work With
           </motion.p>
@@ -203,16 +190,7 @@ export default function TechStackMotion() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="
-              mt-5
-              text-3xl
-              sm:text-4xl
-              lg:text-6xl
-              font-black
-              leading-[1.1]
-              tracking-tight
-              text-slate-900
-            "
+            className="mt-5 text-3xl sm:text-4xl lg:text-6xl font-black leading-[1.1] tracking-tight text-slate-900"
           >
             Engineering
             <span className="block bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
@@ -225,18 +203,7 @@ export default function TechStackMotion() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
             viewport={{ once: true }}
-            className="
-              max-w-3xl
-              mx-auto
-              mt-5
-              sm:mt-6
-              text-sm
-              sm:text-base
-              lg:text-lg
-              leading-relaxed
-              text-slate-600
-              px-2
-            "
+           className="max-w-3xl mx-auto mt-5 sm:mt-6 text-sm sm:text-base lg:text-lg leading-relaxed text-slate-600 px-2"
           >
             We architect scalable software platforms using modern cloud-native
             technologies, ERP systems, AI infrastructure, and enterprise-grade
@@ -263,17 +230,7 @@ export default function TechStackMotion() {
           transition={{ delay: index * 0.05 }}
           viewport={{ once: true }}
           whileTap={{ scale: 0.95 }}
-          className="
-            group
-            relative
-            overflow-hidden
-            rounded-2xl
-            border border-white/60
-            bg-white/80
-            backdrop-blur-xl
-            p-3
-            shadow-[0_6px_24px_rgba(0,0,0,0.05)]
-          "
+          className="group relative overflow-hidden rounded-2xl border border-white/60 bg-white/80 backdrop-blur-xl p-3 shadow-[0_6px_24px_rgba(0,0,0,0.05)]"
         >
           {/* CARD GLOW */}
           <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-cyan-50 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -281,29 +238,13 @@ export default function TechStackMotion() {
           <div className="relative z-10 flex flex-col items-center text-center">
             
             <div
-              className="
-                flex
-                h-11 w-11
-                items-center justify-center
-                rounded-xl
-                bg-gradient-to-br
-                from-blue-500
-                to-cyan-400
-                shadow-md
-                shadow-blue-100
-              "
+              className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 shadow-md shadow-blue-100"
             >
               <Icon className="h-5 w-5 text-white" />
             </div>
 
             <h3
-              className="
-                mt-3
-                text-[11px]
-                font-semibold
-                leading-tight
-                text-slate-900
-              "
+              className="mt-3 text-[11px] font-semibold leading-tight text-slate-900"
             >
               {tech.name}
             </h3>
@@ -336,21 +277,7 @@ export default function TechStackMotion() {
                   scale: 1.03,
                 }}
                 key={index}
-                className="
-                  group
-                  relative
-                  w-[220px]
-                  lg:w-[260px]
-                  flex-shrink-0
-                  overflow-hidden
-                  rounded-[32px]
-                  border border-white/50
-                  bg-white/80
-                  backdrop-blur-xl
-                  p-8 lg:p-10
-                  shadow-[0_10px_50px_rgba(0,0,0,0.08)]
-                  transition-all duration-500
-                "
+                className="group relative w-[220px] lg:w-[260px] flex-shrink-0 overflow-hidden rounded-[32px] border border-white/50 bg-white/80 backdrop-blur-xl p-8 lg:p-10 shadow-[0_10px_50px_rgba(0,0,0,0.08)] transition-all duration-500"
               >
                 {/* HOVER GRADIENT */}
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-cyan-50 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -358,31 +285,13 @@ export default function TechStackMotion() {
                 <div className="relative z-10 flex flex-col items-center text-center">
                   
                   <div
-                    className="
-                      flex
-                      h-20 w-20
-                      items-center justify-center
-                      rounded-3xl
-                      bg-gradient-to-br
-                      from-blue-600
-                      to-cyan-500
-                      shadow-xl
-                      shadow-blue-200
-                      transition-transform duration-500
-                      group-hover:scale-110
-                    "
+                    className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-600 to-cyan-500 shadow-xl shadow-blue-200 transition-transform duration-500 group-hover:scale-110"
                   >
                     <Icon className="h-10 w-10 text-white" />
                   </div>
 
                   <h3
-                    className="
-                      mt-6
-                      text-2xl
-                      font-bold
-                      tracking-tight
-                      text-slate-900
-                    "
+                    className="mt-6 text-2xl font-bold tracking-tight text-slate-900"
                   >
                     {tech.name}
                   </h3>
