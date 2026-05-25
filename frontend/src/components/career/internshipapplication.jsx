@@ -17,9 +17,6 @@ const roles = [
   "Backend Developer Intern",
   "Full Stack Developer",
   "UI/UX Designer",
-  "AI/ML Intern",
-  "Cloud & DevOps Intern",
-  "Business Development",
 ];
 
 export default function InternshipApplication() {

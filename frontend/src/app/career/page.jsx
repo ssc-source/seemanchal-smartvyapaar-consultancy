@@ -19,6 +19,7 @@ import {
   BrainCircuit,
   Layers3,
   ChevronRight,
+  Palette,
 } from "lucide-react";
 
 
@@ -29,37 +30,83 @@ import {
 
 const openings = [
   {
-    title: "Frontend Engineer Intern",
+    title: "Frontend Developer Intern",
     department: "Engineering",
     type: "Internship",
     location: "Remote / Hybrid",
-    experience: "Fresher",
+    experience: "Student / Fresher",
     icon: <Code2 className="h-6 w-6" />,
     description:
-      "Build production-grade UI systems using React, Next.js, TailwindCSS, and component-driven architecture.",
-    skills: ["React", "Next.js", "TailwindCSS", "UI/UX Design"],
+      "Learn and build modern, responsive, and production-ready web interfaces using industry-standard frontend technologies under professional mentorship and real-world project training.",
+    skills: [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "React.js",
+      "Next.js",
+      "TailwindCSS",
+      "Responsive Design",
+    ],
   },
+
   {
-    title: "Backend Engineer Intern",
-    department: "Platform",
-    type: "Internship",
-    location: "Remote",
-    experience: "Fresher",
-    icon: <Layers3 className="h-6 w-6" />,
-    description:
-      "Develop scalable APIs, authentication systems, admin dashboards, and enterprise backend workflows.",
-    skills: ["Node.js", "Express", "MySQL", "MongoDB", "Cloud Systems"],
-  },
-  {
-    title: "Android Developer Intern",
-    department: "Mobile Development",
+    title: "Backend Developer Intern",
+    department: "Backend Engineering",
     type: "Internship",
     location: "Remote",
     experience: "Student / Fresher",
+    icon: <Layers3 className="h-6 w-6" />,
+    description:
+      "Work on APIs, authentication systems, databases, and scalable backend architectures while gaining practical exposure to professional software development workflows.",
+    skills: [
+      "Node.js",
+      "Express.js",
+      "MongoDB",
+      "MySQL",
+      "REST API",
+      "Authentication",
+      "Cloud Basics",
+    ],
+  },
+
+  {
+    title: "Full Stack Developer Intern",
+    department: "Full Stack Engineering",
+    type: "Internship",
+    location: "Remote / Hybrid",
+    experience: "Student / Fresher",
     icon: <Laptop2 className="h-6 w-6" />,
     description:
-      "Develop innovative Android applications, integrate with backend services, and contribute to the mobile ecosystem.",
-    skills: ["Java", "Kotlin/React Native", "Android SDK", "Firebase", "UI/UX Design"],
+      "Gain hands-on experience in both frontend and backend development by building complete full stack applications, dashboards, and real-world industry projects.",
+    skills: [
+      "React.js",
+      "Next.js",
+      "Node.js",
+      "MongoDB",
+      "Express.js",
+      "REST APIs",
+      "Git & GitHub",
+    ],
+  },
+
+  {
+    title: "UI/UX Design Intern",
+    department: "Design",
+    type: "Internship",
+    location: "Remote",
+    experience: "Student / Fresher",
+    icon: <Palette className="h-6 w-6" />,
+    description:
+      "Learn professional UI/UX design principles, wireframing, prototyping, and modern design systems while contributing to real client and product interfaces.",
+    skills: [
+      "Figma",
+      "Wireframing",
+      "Prototyping",
+      "Design Systems",
+      "User Research",
+      "Responsive UI",
+      "Creative Thinking",
+    ],
   },
 ];
 
