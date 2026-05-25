@@ -303,10 +303,10 @@ export default function CareersPage() {
                       ))}
                     </div>
 
-                    <button className="group/button inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-4 font-semibold text-white hover:bg-brand-accent transition-all">
+                    <a href="#apply" className="group/button inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-4 font-semibold text-white hover:bg-brand-accent transition-all">
                       Apply Position
                       <ChevronRight className="h-4 w-4 group-hover/button:translate-x-1 transition-transform" />
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>
