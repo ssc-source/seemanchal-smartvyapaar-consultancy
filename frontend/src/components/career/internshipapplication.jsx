@@ -292,7 +292,7 @@ export default function InternshipApplication() {
           name="whyJoin"
           value={formData.whyJoin}
           onChange={handleChange}
-          placeholder="Why do you want to join SSC?"
+          placeholder="Cover Letter / Why do you want to join SSC?"
           required
           className="w-full rounded-2xl border border-slate-300 px-5 py-4 resize-none"
         />
