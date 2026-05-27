@@ -352,7 +352,7 @@ export default async function AboutPage() {
             </p>
 
             <a
-              href="/careers"
+              href="/career"
               className="inline-flex items-center gap-2 font-semibold text-brand-accent"
             >
               View Careers
