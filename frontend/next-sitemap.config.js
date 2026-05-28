@@ -4,6 +4,7 @@ module.exports = {
   generateRobotsTxt: true,
 
   exclude: [
+    '/admin',
     '/admin/*',
   ],
 };
