@@ -11,7 +11,7 @@ export const siteConfig = {
     linkedin: "https://seemanchalsmartvyapaar.com",
   },
   contact: {
-    email: "seemanchalsmartvyapaar@gmail.com",
+    email: "contact@seemanchalsmartvyapaar.com",
     phone: "+91 6453356884",
     address: "Araria, Bihar",
     whatsapp: "+91 6453356884",
