@@ -33,6 +33,8 @@ const allowedOrigins = [
   'http://127.0.0.1:3000',
   process.env.FRONTEND_URL,
   'https://seemanchal-smartvyapaar-consultancy.vercel.app',
+  "https://seemanchalsmartvyapaar.com",
+  "https://www.seemanchalsmartvyapaar.com",
 ].filter(Boolean);
 
 app.use(
