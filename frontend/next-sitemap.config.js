@@ -2,4 +2,8 @@
 module.exports = {
   siteUrl: 'https://seemanchalsmartvyapaar.com',
   generateRobotsTxt: true,
+
+  exclude: [
+    '/admin/*',
+  ],
 };
