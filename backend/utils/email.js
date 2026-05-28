@@ -69,8 +69,8 @@ exports.sendAdminNotification = async (leadData) => {
   }
 
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
-    const emailFrom = process.env.EMAIL_FROM || 'SSC Website <onboarding@resend.dev>';
+    const adminEmail = process.env.ADMIN_EMAIL || 'seemanchalsmartvyapaar@gmail.com';
+    const emailFrom = process.env.EMAIL_FROM || 'SSC Website <contact@seemanchalsmartvyapaar.com>';
     
     console.log('🟧 [Email] Sending email via Resend', {
       from: emailFrom,
@@ -93,7 +93,7 @@ exports.sendAdminNotification = async (leadData) => {
     }
     
     console.log('🟢 [Email] Email sent successfully via Resend', {
-      emailId: result.id,
+      emailId: result.data?.id,
       timestamp: new Date().toISOString()
     });
     return true;
