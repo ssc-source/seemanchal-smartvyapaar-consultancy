@@ -49,6 +49,15 @@ export default async function Privacy() {
             {content?.userRights?.description || ""}
           </p>
         </div>
+          
+        <div>
+          <h2 className="text-2xl font-semibold text-slate-900">
+            {content?.contact?.title || "Contact Us"}
+          </h2>
+          <p className="mt-2 text-slate-600">
+            {content?.contact?.description || ""}
+          </p>
+        </div>
       </section>
     </main>
   );

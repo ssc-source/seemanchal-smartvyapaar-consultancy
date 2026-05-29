@@ -143,14 +143,32 @@ exports.sendCareerApplicationEmail = async (data) => {
       </div>
     `;
 
+    // const response = await resend.emails.send({
+    //   from: process.env.EMAIL_FROM,
+    //   to: process.env.ADMIN_EMAIL,
+    //   subject: `New Career Application - ${data.fullName}`,
+    //   html,
+    // });
     const response = await resend.emails.send({
-      from: process.env.EMAIL_FROM,
-      to: process.env.ADMIN_EMAIL,
+      from:
+        process.env.CAREER_EMAIL ||
+        "SSC Careers <career@seemanchalsmartvyapaar.com>",
+
+      to:
+        process.env.CAREER_EMAIL ||
+        "career@seemanchalsmartvyapaar.com",
+
+      replyTo: data.email,
+
       subject: `New Career Application - ${data.fullName}`,
+
       html,
     });
 
-    console.log("🟢 Career Application Email Sent:", response);
+    console.log("🟢 Career Application Email Sent:", {
+      emailId: response.data?.id,
+      success: !response.error,
+    });
 
     return true;
   } catch (error) {
@@ -200,18 +218,25 @@ exports.sendCommunityApplicationEmail = async (data) => {
     `;
 
     const response = await resend.emails.send({
+      from:
+        process.env.COMMUNITY_EMAIL ||
+        "SSC Community <community@seemanchalsmartvyapaar.com>",
 
-      from: process.env.EMAIL_FROM,
+      to:
+        process.env.COMMUNITY_EMAIL ||
+        "community@seemanchalsmartvyapaar.com",
 
-      to: process.env.ADMIN_EMAIL,
+      replyTo: data.email,
 
       subject: `New SSC Community Join Request - ${data.fullName}`,
 
       html,
-
     });
 
-    console.log("🟢 Community Email Sent:", response);
+    console.log("🟢 Community Email Sent:", {
+      emailId: response.data?.id,
+      success: !response.error,
+    });
 
     return true;
 

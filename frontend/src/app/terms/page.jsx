@@ -19,6 +19,9 @@ export default async function TermsPage() {
 
       <h2 className="text-2xl font-semibold mb-3">Modifications</h2>
       <p className="mb-4">{content.modifications}</p>
+
+      <h2 className="text-2xl font-semibold mb-3">Contact</h2>
+      <p>{content.contact}</p>
     </div>
   );
 }

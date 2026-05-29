@@ -221,15 +221,20 @@ export const content = {
     userRights: {
       title: "User Rights",
       description: "You have the right to access, correct, or delete your personal information. You can also opt out of receiving marketing communications from us at any time by following the unsubscribe instructions in our emails."
+    },
+    contact: {
+      title: "Contact Us",
+      description: "If you have any questions about this privacy policy or how we handle your information, please contact us at <info@seemanchalsmartvyapaar.com>."
     }
-  }, 
+  },
   termsOfService: {
     title: "Terms of Service",
     description: "By using our website and services, you agree to the following terms and conditions. Please read them carefully before engaging with our offerings.",
     useOfServices: "You agree to use our services only for lawful purposes and in accordance with these terms. You are responsible for any content you submit and must not engage in any activity that could harm our business or reputation.",
     intellectualProperty: "All content and materials on our website, including text, graphics, logos, and software, are the property of Seemanchal SmartVyapaar Consultancy and are protected by intellectual property laws. You may not use, reproduce, or distribute any content without our express written permission.",
     disclaimers: "Our services are provided 'as is' without any warranties. We do not guarantee that our services will be uninterrupted or error-free. We are not liable for any damages arising from the use of our services.",
-    modifications: "We reserve the right to modify these terms at any time. Any changes will be effective immediately upon posting on our website. Your continued use of our services after any changes constitutes your acceptance of the new terms."
+    modifications: "We reserve the right to modify these terms at any time. Any changes will be effective immediately upon posting on our website. Your continued use of our services after any changes constitutes your acceptance of the new terms.",
+    contact: "If you have any questions about these terms of service, please contact us at <support@seemanchalsmartvyapaar.com>."
   }
 };
 
