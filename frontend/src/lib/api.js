@@ -3,17 +3,20 @@
  * PRODUCTION-HARDENED: Timeout, abort signal, better errors, comprehensive logs
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const _RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_BASE_URL = (_RAW_API_URL && typeof _RAW_API_URL === 'string' && _RAW_API_URL.trim())
+  ? _RAW_API_URL.trim().replace(/\/$/, '')
+  : 'http://localhost:5000';
 const FETCH_TIMEOUT = 30000; // 30 seconds
 
 if (typeof window !== 'undefined') {
-  console.log('═══════════════════════════════════════════════════════════');
-  console.log('🟦 [API] Frontend API Client Initialized');
-  console.log('═══════════════════════════════════════════════════════════');
-  console.log('API_BASE_URL:', API_BASE_URL);
-  console.log('FETCH_TIMEOUT:', FETCH_TIMEOUT + 'ms');
-  console.log('ENV Variable NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
-  console.log('═══════════════════════════════════════════════════════════');
+  // console.log('═══════════════════════════════════════════════════════════');
+  // console.log('🟦 [API] Frontend API Client Initialized');
+  // console.log('═══════════════════════════════════════════════════════════');
+  // console.log('API_BASE_URL:', API_BASE_URL);
+  // console.log('FETCH_TIMEOUT:', FETCH_TIMEOUT + 'ms');
+  // console.log('ENV Variable NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
+  // console.log('═══════════════════════════════════════════════════════════');
 }
 
 export const api = {
