@@ -1,25 +1,35 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const getApiBaseUrl = () => {
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return 'http://localhost:5000';
+  }
+
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+};
 
 class AdminApi {
   constructor() {
     this.token = null;
+    this.isAuthenticated = false;
     if (typeof window !== 'undefined') {
-      this.token = localStorage.getItem('adminToken');
+      this.isAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
     }
   }
 
   setToken(token) {
-    this.token = token;
+    // Backward-compatible in-memory token only. Persistent JWT storage was removed in Phase 2.
+    this.token = typeof token === 'string' ? token : null;
     if (typeof window !== 'undefined') {
       if (token) {
-        localStorage.setItem('adminToken', token);
+        sessionStorage.setItem('adminAuthenticated', 'true');
+        this.isAuthenticated = true;
       } else {
-        localStorage.removeItem('adminToken');
+        sessionStorage.removeItem('adminAuthenticated');
+        this.isAuthenticated = false;
       }
     }
   }
 
-  async request(endpoint, options = {}) {
+  async request(endpoint, options = {}, retry = true) {
     const headers = {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -29,9 +39,10 @@ class AdminApi {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(`${getApiBaseUrl()}${endpoint}`, {
       ...options,
       headers,
+      credentials: 'include',
     });
 
     const contentType = response.headers.get('content-type');
@@ -45,6 +56,15 @@ class AdminApi {
     }
 
     if (!response.ok) {
+      if (response.status === 401 && retry && endpoint !== '/api/auth/login' && endpoint !== '/api/auth/refresh') {
+        try {
+          await this.refresh();
+          return this.request(endpoint, options, false);
+        } catch {
+          this.setToken(null);
+        }
+      }
+
       if (response.status === 401) {
         this.setToken(null);
         if (typeof window !== 'undefined') {
@@ -62,10 +82,26 @@ class AdminApi {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    if (result.token) {
-      this.setToken(result.token);
-    }
+    this.setToken(result.token || result.data?.accessToken || true);
     return result;
+  }
+
+  async logout() {
+    try {
+      await this.request('/api/auth/logout', { method: 'POST' }, false);
+    } finally {
+      this.setToken(null);
+    }
+  }
+
+  async refresh() {
+    const result = await this.request('/api/auth/refresh', { method: 'POST' }, false);
+    this.setToken(result.data?.accessToken || true);
+    return result;
+  }
+
+  async me() {
+    return this.request('/api/auth/me');
   }
 
   // --- Leads ---
@@ -170,6 +206,93 @@ class AdminApi {
 
   async deleteHomepageSection(id) {
     return this.request(`/api/admin/homepage-sections/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // --- Content Pages ---
+  async getContentPages() {
+    return this.request('/api/admin/content-pages');
+  }
+
+  async getContentPage(id) {
+    return this.request(`/api/admin/content-pages/${id}`);
+  }
+
+  async createContentPage(data) {
+    return this.request('/api/admin/content-pages', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateContentPage(id, data) {
+    return this.request(`/api/admin/content-pages/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteContentPage(id) {
+    return this.request(`/api/admin/content-pages/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // --- Job Openings ---
+  async getJobOpenings() {
+    return this.request('/api/admin/job-openings');
+  }
+
+  async getJobOpening(id) {
+    return this.request(`/api/admin/job-openings/${id}`);
+  }
+
+  async createJobOpening(data) {
+    return this.request('/api/admin/job-openings', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateJobOpening(id, data) {
+    return this.request(`/api/admin/job-openings/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteJobOpening(id) {
+    return this.request(`/api/admin/job-openings/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // --- Community Items ---
+  async getCommunityItems() {
+    return this.request('/api/admin/community-items');
+  }
+
+  async getCommunityItem(id) {
+    return this.request(`/api/admin/community-items/${id}`);
+  }
+
+  async createCommunityItem(data) {
+    return this.request('/api/admin/community-items', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateCommunityItem(id, data) {
+    return this.request(`/api/admin/community-items/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteCommunityItem(id) {
+    return this.request(`/api/admin/community-items/${id}`, {
       method: 'DELETE',
     });
   }

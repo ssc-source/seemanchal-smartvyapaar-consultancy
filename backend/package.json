@@ -1,7 +1,12 @@
 {
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "migrate": "node migrate.js up",
+    "migrate:down": "node migrate.js down",
+    "seed": "node seed.js up",
+    "seed:down": "node seed.js down",
+    "test:security": "node tests/security-smoke.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

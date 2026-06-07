@@ -4,10 +4,13 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
 const path = require('path');
 
 const { sequelize } = require('./models');
+const { allowedOrigins, corsOptions, apiLimiter, validateEnvironment } = require('./security/config');
+const { requestContext, sanitizeInput } = require('./middlewares/requestContext');
+
+validateEnvironment();
 
 const app = express();
 
@@ -22,55 +25,30 @@ app.set('trust proxy', 1);
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
+    contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
   })
 );
 
 /* =========================================================
    CORS
 ========================================================= */
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
-  process.env.FRONTEND_URL,
-  "https://seemanchalsmartvyapaar.com",
-  "https://www.seemanchalsmartvyapaar.com",
-].filter(Boolean);
-
-app.use(
-  cors({
-    origin: function (origin, callback) {
-
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      console.error('❌ CORS Blocked:', origin);
-
-      return callback(new Error('CORS not allowed'));
-    },
-
-    credentials: true,
-
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-);
+app.use(cors(corsOptions));
 
 /* =========================================================
    BODY PARSERS
 ========================================================= */
-app.use(express.json());
+app.use(requestContext);
+
+app.use(express.json({ limit: process.env.REQUEST_BODY_LIMIT || '1mb' }));
 
 app.use(
   express.urlencoded({
     extended: true,
+    limit: process.env.REQUEST_BODY_LIMIT || '1mb',
   })
 );
+
+app.use(sanitizeInput);
 
 /* =========================================================
    LOGGER
@@ -80,12 +58,6 @@ app.use(morgan('combined'));
 /* =========================================================
    RATE LIMITER
 ========================================================= */
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: 'Too many requests from this IP.',
-});
-
 app.use('/api/', apiLimiter);
 
 /* =========================================================
@@ -141,6 +113,14 @@ app.use(
   require('./routes/homepage')
 );
 
+app.use('/api/content-pages', require('./routes/contentPages'));
+app.use('/api/job-openings', require('./routes/jobOpenings'));
+app.use('/api/community-items', require('./routes/communityItems'));
+
+app.use('/api/admin/content-pages', require('./routes/adminContentPages'));
+app.use('/api/admin/job-openings', require('./routes/adminJobOpenings'));
+app.use('/api/admin/community-items', require('./routes/adminCommunityItems'));
+
 /* =========================================================
    HEALTH ROUTE
 ========================================================= */
@@ -150,6 +130,20 @@ app.get('/api/health', (req, res) => {
     status: 'OK',
     message: 'API is running',
   });
+});
+
+app.get('/api/live', (req, res) => {
+  return res.status(200).json({ success: true, status: 'live' });
+});
+
+app.get('/api/ready', async (req, res, next) => {
+  try {
+    await sequelize.authenticate();
+    return res.status(200).json({ success: true, status: 'ready' });
+  } catch (error) {
+    error.statusCode = 503;
+    return next(error);
+  }
 });
 
 /* =========================================================
@@ -182,22 +176,15 @@ app.use(globalErrorHandler);
 const PORT = process.env.PORT || 5000;
 
 sequelize
-  .sync()
+  .authenticate()
   .then(() => {
-
-    console.log('Database synced successfully');
+    console.log('Database connection established.');
 
     app.listen(PORT, () => {
-
       console.log(`Server is running on port ${PORT}`);
-
       console.log('✅ Allowed Origins:', allowedOrigins);
-
     });
-
   })
   .catch((err) => {
-
     console.error('❌ Database connection failed:', err);
-
   });

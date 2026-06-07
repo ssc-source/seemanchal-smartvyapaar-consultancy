@@ -1,17 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const adminHomepageController = require('../controllers/adminHomepageController');
-const { protect } = require('../middlewares/authMiddleware');
+const { protect, requirePermission } = require('../middlewares/authMiddleware');
+const { PERMISSIONS } = require('../security/permissions');
 
 router.use(protect); // All routes protected
 
 router.route('/')
-  .get(adminHomepageController.getAllSections)
-  .post(adminHomepageController.createSection);
+  .get(requirePermission(PERMISSIONS.HOMEPAGE_READ), adminHomepageController.getAllSections)
+  .post(requirePermission(PERMISSIONS.HOMEPAGE_WRITE), adminHomepageController.createSection);
 
 router.route('/:id')
-  .get(adminHomepageController.getSection)
-  .put(adminHomepageController.updateSection)
-  .delete(adminHomepageController.deleteSection);
+  .get(requirePermission(PERMISSIONS.HOMEPAGE_READ), adminHomepageController.getSection)
+  .put(requirePermission(PERMISSIONS.HOMEPAGE_WRITE), adminHomepageController.updateSection)
+  .delete(requirePermission(PERMISSIONS.HOMEPAGE_WRITE), adminHomepageController.deleteSection);
 
 module.exports = router;

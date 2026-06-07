@@ -15,6 +15,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
+    metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://seemanchalsmartvyapaar.com"
+  ),
   title: {
     default: siteConfig.name,
     template: `%s | ${siteConfig.shortName}`,

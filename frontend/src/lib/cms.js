@@ -1,8 +1,14 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const getApiBaseUrl = () => {
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:5000';
+  }
+
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+};
 
 class CmsClient {
   async fetchApi(endpoint) {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(`${getApiBaseUrl()}${endpoint}`, {
       next: { revalidate: 60 } // Revalidate every 60 seconds (Next.js App Router cache)
     });
     
@@ -32,6 +38,30 @@ class CmsClient {
 
   async getHomepageSections() {
     return this.fetchApi('/api/homepage-sections');
+  }
+
+  async getContentPages() {
+    return this.fetchApi('/api/content-pages');
+  }
+
+  async getContentPage(slug) {
+    return this.fetchApi(`/api/content-pages/${encodeURIComponent(slug)}`);
+  }
+
+  async getCareerOpenings() {
+    return this.fetchApi('/api/job-openings');
+  }
+
+  async getCommunityItems() {
+    return this.fetchApi('/api/community-items');
+  }
+
+  async getPrivacyPolicy() {
+    return this.fetchApi('/api/content-pages/privacy-policy');
+  }
+
+  async getTermsOfService() {
+    return this.fetchApi('/api/content-pages/terms-of-service');
   }
 }
 

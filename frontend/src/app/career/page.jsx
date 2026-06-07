@@ -1,8 +1,9 @@
 "use client";
 import InternshipApplication from "@/components/career/internshipapplication";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { contentAdapter } from "@/lib/contentAdapter";
 import {
   ArrowRight,
   Briefcase,
@@ -12,7 +13,6 @@ import {
   Laptop2,
   MapPin,
   Rocket,
-  Send,
   Sparkles,
   Users2,
   Building2,
@@ -28,7 +28,7 @@ import {
 /*                                OPENINGS                                    */
 /* -------------------------------------------------------------------------- */
 
-const openings = [
+const baseOpenings = [
   {
     title: "Frontend Developer Intern",
     department: "Engineering",
@@ -110,12 +110,37 @@ const openings = [
   },
 ];
 
+const openingIconMap = {
+  'Frontend Developer Intern': <Code2 className="h-6 w-6" />,
+  'Backend Developer Intern': <Layers3 className="h-6 w-6" />,
+  'Full Stack Developer Intern': <Laptop2 className="h-6 w-6" />,
+  'UI/UX Design Intern': <Palette className="h-6 w-6" />,
+};
+
 /* -------------------------------------------------------------------------- */
 /*                                 MAIN PAGE                                  */
 /* -------------------------------------------------------------------------- */
 
 export default function CareersPage() {
+  const [openings, setOpenings] = useState(baseOpenings);
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    const loadOpenings = async () => {
+      try {
+        const liveOpenings = await contentAdapter.resolveCareerOpenings(baseOpenings);
+        const merged = liveOpenings.map((job) => ({
+          ...job,
+          icon: openingIconMap[job.title] || openingIconMap[job.department] || <Code2 className="h-6 w-6" />,
+        }));
+        setOpenings(merged);
+      } catch (error) {
+        console.error('[Career Page] Failed to load CMS openings:', error);
+      }
+    };
+
+    loadOpenings();
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();

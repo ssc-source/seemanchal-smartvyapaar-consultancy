@@ -10,7 +10,9 @@ import {
   Briefcase, 
   Settings, 
   LogOut,
-  Layers
+  Layers,
+  FileText,
+  Users as UsersIcon
 } from "lucide-react";
 
 export default function AdminLayout({ children }) {
@@ -26,10 +28,37 @@ export default function AdminLayout({ children }) {
   }, []);
 
   useEffect(() => {
-    if (!isLoginPage && !adminApi.token) {
-      router.replace("/admin/login");
-    }
+    let active = true;
+
+    const verifySession = async () => {
+      if (isLoginPage) return;
+
+      if (!adminApi.isAuthenticated && !adminApi.token) {
+        router.replace("/admin/login");
+        return;
+      }
+
+      try {
+        await adminApi.me();
+      } catch {
+        if (active) router.replace("/admin/login");
+      }
+    };
+
+    verifySession();
+
+    return () => {
+      active = false;
+    };
   }, [isLoginPage, router]);
+
+  const handleLogout = async () => {
+    try {
+      await adminApi.logout();
+    } finally {
+      router.push("/admin/login");
+    }
+  };
 
   if (!isMounted) return null; // Prevent hydration mismatch
 
@@ -37,15 +66,13 @@ export default function AdminLayout({ children }) {
     return <>{children}</>;
   }
 
-  const handleLogout = () => {
-    adminApi.setToken(null);
-    router.push("/admin/login");
-  };
-
   const navItems = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { label: "Leads", href: "/admin/leads", icon: Users },
+    { label: "Leads", href: "/admin/leads", icon: UsersIcon },
     { label: "Homepage", href: "/admin/homepage", icon: LayoutDashboard },
+    { label: "Content Pages", href: "/admin/content-pages", icon: FileText },
+    { label: "Job Openings", href: "/admin/job-openings", icon: Briefcase },
+    { label: "Community Items", href: "/admin/community-items", icon: Users },
     { label: "Services", href: "/admin/services", icon: Layers },
     { label: "Projects", href: "/admin/projects", icon: Briefcase },
     { label: "Settings", href: "/admin/settings", icon: Settings },

@@ -29,6 +29,19 @@ const parseMaybeJSON = (value) => {
   return [];
 };
 
+const parseMaybeObject = (value) => {
+  if (value && typeof value === 'object') return value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed && typeof parsed === 'object' ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
+
 export const contentAdapter = {
   async resolveServices() {
     try {
@@ -234,11 +247,106 @@ export const contentAdapter = {
   },
 
   async resolveAbout() {
-    return {
-      about: content.about,
-      stats: content.stats,
-      whyChooseUs: content.whyChooseUs,
-    };
+    try {
+      const liveAboutPage = await cms.getContentPage('about');
+      if (liveAboutPage && typeof liveAboutPage === 'object' && liveAboutPage.content) {
+        console.info('[CMS] Resolved live about content.');
+        const liveContent = liveAboutPage.content;
+        return {
+          about: {
+            story: liveContent.story || content.about.story,
+            mission: liveContent.mission || content.about.mission,
+            vision: liveContent.vision || content.about.vision,
+          },
+          stats: content.stats,
+          whyChooseUs: content.whyChooseUs,
+        };
+      }
+      throw new Error('Invalid about content payload');
+    } catch (error) {
+      console.warn('[CMS FALLBACK] About:', error.message);
+      return {
+        about: content.about,
+        stats: content.stats,
+        whyChooseUs: content.whyChooseUs,
+      };
+    }
+  },
+
+  async resolveCareerOpenings(fallbackOpenings = []) {
+    try {
+      const liveOpenings = safeArray(await cms.getCareerOpenings());
+      if (liveOpenings.length === 0) {
+        console.info('[CMS] No live career openings found, falling back to static.');
+        return fallbackOpenings;
+      }
+
+      const normalizeType = (employmentType) => {
+        switch (employmentType) {
+          case 'FULL_TIME':
+            return 'Full Time';
+          case 'PART_TIME':
+            return 'Part Time';
+          case 'CONTRACT':
+            return 'Contract';
+          case 'INTERNSHIP':
+          default:
+            return 'Internship';
+        }
+      };
+
+      const validOpenings = liveOpenings
+        .filter((opening) => opening && opening.title && opening.department)
+        .map((opening) => ({
+          title: opening.title,
+          department: opening.department,
+          type: normalizeType(opening.employmentType),
+          location: opening.location || '',
+          experience: opening.experience || '',
+          description: opening.description || '',
+          skills: parseMaybeJSON(opening.skills),
+        }));
+
+      return validOpenings.length > 0 ? validOpenings : fallbackOpenings;
+    } catch (error) {
+      console.warn('[CMS FALLBACK] Career Openings:', error.message);
+      return fallbackOpenings;
+    }
+  },
+
+  async resolveCommunity({ fallbackGroups = [], fallbackEvents = [] } = {}) {
+    try {
+      const liveItems = safeArray(await cms.getCommunityItems());
+      if (liveItems.length === 0) {
+        console.info('[CMS] No live community items found, falling back to static.');
+        return { communities: fallbackGroups, events: fallbackEvents };
+      }
+
+      const groups = liveItems
+        .filter((item) => item.type === 'GROUP')
+        .map((item) => ({
+          title: item.title,
+          description: item.description || '',
+          tags: parseMaybeJSON(item.metadata?.tags),
+          iconName: item.metadata?.icon || '',
+        }));
+
+      const events = liveItems
+        .filter((item) => item.type !== 'GROUP')
+        .map((item) => ({
+          title: item.title,
+          date: item.metadata?.date || '',
+          type: item.metadata?.eventType || item.type || '',
+        }));
+
+      return {
+        communities: groups.length > 0 ? groups : fallbackGroups,
+        events: events.length > 0 ? events : fallbackEvents,
+      };
+    } catch (error) {
+      console.warn('[CMS FALLBACK] Community:', error.message);
+      return { communities: fallbackGroups, events: fallbackEvents };
+    }
   },
 
   async resolveContact() {
@@ -247,9 +355,9 @@ export const contentAdapter = {
 
   async getPrivacyPolicy() {
     try {
-      const livePrivacy = await cms.getPrivacyPolicy();
+      const livePrivacy = parseMaybeObject(await cms.getPrivacyPolicy());
 
-      if (!livePrivacy || typeof livePrivacy !== 'object') {
+      if (!livePrivacy) {
         throw new Error('Invalid privacy policy payload');
       }
 
@@ -282,9 +390,9 @@ export const contentAdapter = {
   },
   async getTermsOfService() {
     try {
-      const liveTerms = await cms.getTermsOfService();
+      const liveTerms = parseMaybeObject(await cms.getTermsOfService());
 
-      if (!liveTerms || typeof liveTerms !== 'object') {
+      if (!liveTerms) {
         throw new Error('Invalid terms of service payload');
       }
 
@@ -294,9 +402,12 @@ export const contentAdapter = {
         title: liveTerms.title || content.termsOfService.title,
         description: liveTerms.description || content.termsOfService.description,
         useOfServices: liveTerms.useOfServices || content.termsOfService.useOfServices,
-        intellectualProperty: liveTerms.intellectualProperty || content.termsOfService.intellectualProperty,
+        intellectualProperty:
+          liveTerms.intellectualProperty || content.termsOfService.intellectualProperty,
         disclaimers: liveTerms.disclaimers || content.termsOfService.disclaimers,
         modifications: liveTerms.modifications || content.termsOfService.modifications,
+        contact:
+          liveTerms.contact || content.termsOfService.contact,
       };
     } catch (error) {
       console.warn('[CMS FALLBACK] Terms of Service:', error.message);

@@ -1,7 +1,8 @@
 "use client";
 import CommunityApplication from "@/components/community/communityapplication";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { contentAdapter } from "@/lib/contentAdapter";
 import {
   ArrowRight,
   Users2,
@@ -28,7 +29,7 @@ import {
 /*                              COMMUNITY DATA                                */
 /* -------------------------------------------------------------------------- */
 
-const communities = [
+const baseCommunities = [
   {
     title: "Developers Community",
     icon: <Code2 className="h-7 w-7" />,
@@ -47,7 +48,7 @@ const communities = [
     title: "Student Network",
     icon: <GraduationCap className="h-7 w-7" />,
     description:
-      "Learn modern development, participate in internships, hackathons, workshops, and real-world projects.",
+      "Learn modern development, participate in internships, workshops, and real-world projects.",
     tags: ["Learning", "Internships", "Hackathons"],
   },
   {
@@ -59,11 +60,7 @@ const communities = [
   },
 ];
 
-/* -------------------------------------------------------------------------- */
-/*                               EVENTS DATA                                  */
-/* -------------------------------------------------------------------------- */
-
-const events = [
+const baseEvents = [
   {
     title: "Full Stack Development Bootcamp",
     date: "June 2026",
@@ -81,12 +78,44 @@ const events = [
   },
 ];
 
+const communityIconMap = {
+  'Developers Community': <Code2 className="h-7 w-7" />,
+  'Startup Ecosystem': <Rocket className="h-7 w-7" />,
+  'Student Network': <GraduationCap className="h-7 w-7" />,
+  'Business Community': <Building2 className="h-7 w-7" />,
+};
+
 /* -------------------------------------------------------------------------- */
 /*                                MAIN PAGE                                   */
 /* -------------------------------------------------------------------------- */
 
 export default function CommunityPage() {
+  const [communities, setCommunities] = useState(baseCommunities);
+  const [events, setEvents] = useState(baseEvents);
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    const loadCommunity = async () => {
+      try {
+        const liveCommunity = await contentAdapter.resolveCommunity({
+          fallbackGroups: baseCommunities,
+          fallbackEvents: baseEvents,
+        });
+
+        setCommunities(
+          liveCommunity.communities.map((item) => ({
+            ...item,
+            icon: communityIconMap[item.title] || <Code2 className="h-7 w-7" />,
+          }))
+        );
+        setEvents(liveCommunity.events);
+      } catch (error) {
+        console.error('[Community Page] Failed to load CMS community content:', error);
+      }
+    };
+
+    loadCommunity();
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
