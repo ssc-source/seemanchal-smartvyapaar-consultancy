@@ -238,7 +238,8 @@ export default function AssessmentRegisterPage() {
                 <button
                   type="button"
                   onClick={handleCreateOrder}
-                  disabled={submitting || !quiz}
+                  // disabled={submitting || !quiz}
+                  disabled
                   className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-white font-semibold hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
                   {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowRight className="h-5 w-5" />}

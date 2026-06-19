@@ -183,7 +183,7 @@ export default function AssessmentPage() {
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-600" />
-                      60 minute timer
+                      30 minute timer
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-600" />
@@ -198,11 +198,12 @@ export default function AssessmentPage() {
 
                 <Link href="/career/assessment/register">
                   <button
-                    disabled={!hasStudentProfile}
+                    // disabled={!hasStudentProfile}
+                    disabled
                     className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6"
                   >
                     <ArrowRight className="h-5 w-5" />
-                    Register Here
+                    Register Here (Comming Soon)
                   </button>
                 </Link>
 
