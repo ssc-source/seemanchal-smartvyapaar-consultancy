@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 
-import { api } from "@/lib/api";
+import { API_BASE_URL } from "@/lib/api";
 
 import {
   ArrowRight,
@@ -11,12 +12,13 @@ import {
   Send,
   Sparkles,
 } from "lucide-react";
+import { useToast } from '@/components/ui/Toast';
 
 const roles = [
-  "Frontend Developer Intern",
-  "Backend Developer Intern",
-  "Full Stack Developer",
-  "UI/UX Designer",
+  { label: "Frontend Developer Intern", value: "Frontend" },
+  { label: "Backend Developer Intern", value: "Backend" },
+  { label: "Full Stack Developer", value: "Full Stack" },
+  { label: "UI/UX Designer", value: "UI/UX" },
 ];
 
 export default function InternshipApplication() {
@@ -26,6 +28,7 @@ export default function InternshipApplication() {
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
+    registrationId: "",
     fullName: "",
     email: "",
     phone: "",
@@ -33,44 +36,167 @@ export default function InternshipApplication() {
     college: "",
     degree: "",
     graduationYear: "",
-    role: "",
+    applyingFor: "",
     internshipType: "",
     github: "",
     linkedin: "",
     portfolio: "",
-    experience: "",
-    whyJoin: "",
+    projectsExperience: "",
+    whyJoinSSC: "",
   });
+  const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState("");
+
+  const router = useRouter();
+  const toast = useToast();
+
+  useEffect(() => {
+    // Prefill from authenticated student profile if available
+    const loadProfile = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/student/me`, { credentials: 'include' });
+        const json = await res.json();
+        if (res.ok && json.success && json.data && json.data.student) {
+          const s = json.data.student;
+          setFormData((prev) => ({
+            ...prev,
+            registrationId: s.registrationId || prev.registrationId,
+            fullName: s.name || prev.fullName,
+            email: s.email || prev.email,
+            phone: s.phone || prev.phone,
+          }));
+          return;
+        }
+      } catch (e) {
+        // fallback to localStorage if API fails
+        if (typeof window === 'undefined') return;
+        const user = window.localStorage.getItem('user');
+        if (!user) return;
+        try {
+          const parsed = JSON.parse(user);
+          setFormData((prev) => ({
+            ...prev,
+            registrationId: parsed.registrationId || prev.registrationId,
+            fullName: parsed.name || prev.fullName,
+            email: parsed.email || prev.email,
+            phone: parsed.phone || prev.phone,
+          }));
+        } catch (error) {
+          console.warn('Failed to parse user from localStorage', error);
+        }
+      }
+    };
+
+    loadProfile();
+  }, []);
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+    setErrors((prev) => ({
+      ...prev,
+      [name]: undefined,
+    }));
+  };
+
+  const validateForm = () => {
+    const nextErrors = {};
+
+    if (!formData.registrationId?.trim()) nextErrors.registrationId = 'Registration ID is required';
+    if (!formData.fullName?.trim()) nextErrors.fullName = 'Full Name is required';
+    if (!formData.email?.trim()) nextErrors.email = 'Email is required';
+    if (!formData.phone?.trim()) nextErrors.phone = 'Phone Number is required';
+    if (!formData.location?.trim()) nextErrors.location = 'Location is required';
+    if (!formData.college?.trim()) nextErrors.college = 'College is required';
+    if (!formData.degree?.trim()) nextErrors.degree = 'Degree is required';
+    if (!formData.graduationYear?.trim()) nextErrors.graduationYear = 'Graduation Year is required';
+    if (!formData.applyingFor?.trim()) nextErrors.applyingFor = 'Applying For is required';
+    if (!formData.internshipType?.trim()) nextErrors.internshipType = 'Internship Type is required';
+    if (!formData.projectsExperience?.trim()) nextErrors.projectsExperience = 'Projects / Experience is required';
+    if (!formData.whyJoinSSC?.trim()) nextErrors.whyJoinSSC = 'Why Join SSC is required';
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setServerError('');
+
+    if (!validateForm()) {
+      return;
+    }
 
     try {
       setLoading(true);
 
-      await api.submitCareerApplication(formData);
+      const submitData = {
+        registrationId: formData.registrationId,
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        location: formData.location,
+        college: formData.college,
+        degree: formData.degree,
+        graduationYear: formData.graduationYear,
+        applyingFor: formData.applyingFor,
+        internshipType: formData.internshipType,
+        github: formData.github || null,
+        linkedin: formData.linkedin || null,
+        portfolio: formData.portfolio || null,
+        projectsExperience: formData.projectsExperience,
+        whyJoinSSC: formData.whyJoinSSC,
+      };
 
+      if (process.env.NODE_ENV !== 'production') {
+        console.debug('[InternshipApplication] submit payload', submitData);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/internships/apply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submitData),
+      });
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        const rawText = await response.text();
+        console.error('[InternshipApplication] Failed to parse response JSON', { status: response.status, rawText, jsonError });
+        throw new Error('Invalid server response. Please check console for details.');
+      }
+
+      if (!response.ok) {
+        console.error('[InternshipApplication] Server returned error', { status: response.status, result });
+        const serverMessage = result.message || (result.errors && result.errors.join(', ')) || 'Failed to submit internship application';
+        if (/resume/i.test(serverMessage)) {
+          throw new Error('Your application could not be submitted due to outdated validation. Please contact support.');
+        }
+        throw new Error(serverMessage);
+      }
+
+      // show success toast and redirect to dashboard
+      if (toast && toast.success) toast.success('Internship application submitted successfully');
+      router.push('/dashboard');
       setSubmitted(true);
 
     } catch (error) {
-      console.error(error);
-
-      alert("Failed to submit application");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+        console.error('[InternshipApplication] submit error', error);
+        setServerError(error.message || 'Failed to submit application');
+        if (toast && toast.error) {
+          toast.error(error.message || 'Failed to submit application');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
   if (submitted) {
     return (
-      <div className="rounded-[32px] border border-slate-200 bg-white p-16 text-center shadow-xl">
+      <div className="rounded-4xl border border-slate-200 bg-white p-16 text-center shadow-xl">
 
         <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-green-100">
           <Send className="h-10 w-10 text-green-600" />
@@ -112,14 +238,39 @@ export default function InternshipApplication() {
 
       {/* FORM */}
 
+      <div className="p-8 md:p-12">
+        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-700 mb-8">
+          Resume upload is not required for this application.
+        </div>
+      </div>
+
       <form
         onSubmit={handleSubmit}
         className="p-8 md:p-12 space-y-10"
       >
+        {serverError ? (
+          <div className="rounded-3xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {serverError}
+          </div>
+        ) : null}
 
         {/* PERSONAL */}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+          <div className="space-y-2">
+            <input
+              type="text"
+              name="registrationId"
+              value={formData.registrationId}
+              readOnly
+              placeholder="Registration ID"
+              className="w-full rounded-2xl border border-slate-300 bg-slate-100 px-5 py-4"
+            />
+            {errors.registrationId && (
+              <p className="text-sm text-red-600">{errors.registrationId}</p>
+            )}
+          </div>
 
           <input
             type="text"
@@ -128,6 +279,7 @@ export default function InternshipApplication() {
             onChange={handleChange}
             placeholder="Full Name"
             required
+            readOnly
             className="w-full rounded-2xl border border-slate-300 px-5 py-4"
           />
 
@@ -138,6 +290,7 @@ export default function InternshipApplication() {
             onChange={handleChange}
             placeholder="Email Address"
             required
+            readOnly
             className="w-full rounded-2xl border border-slate-300 px-5 py-4"
           />
 
@@ -148,6 +301,7 @@ export default function InternshipApplication() {
             onChange={handleChange}
             placeholder="Phone Number"
             required
+            readOnly
             className="w-full rounded-2xl border border-slate-300 px-5 py-4"
           />
 
@@ -197,36 +351,44 @@ export default function InternshipApplication() {
           />
 
           <select
-            name="role"
-            value={formData.role}
+            name="applyingFor"
+            value={formData.applyingFor}
             onChange={handleChange}
             required
             className="w-full rounded-2xl border border-slate-300 px-5 py-4"
           >
-            <option value="">Select Role</option>
+            <option value="">Applying For</option>
 
             {roles.map((role, index) => (
-              <option key={index}>
-                {role}
+              <option key={index} value={role.value}>
+                {role.label}
               </option>
             ))}
           </select>
+          {errors.applyingFor && (
+            <p className="mt-2 text-sm text-red-600">{errors.applyingFor}</p>
+          )}
 
         </div>
 
         {/* INTERNSHIP TYPE */}
 
-        <select
-          name="internshipType"
-          value={formData.internshipType}
-          onChange={handleChange}
-          className="w-full rounded-2xl border border-slate-300 px-5 py-4"
-        >
-          <option value="">Select Internship Type</option>
-          <option>Remote</option>
-          <option>Hybrid</option>
-          <option>On-site</option>
-        </select>
+        <div>
+          <select
+            name="internshipType"
+            value={formData.internshipType}
+            onChange={handleChange}
+            className="w-full rounded-2xl border border-slate-300 px-5 py-4"
+          >
+            <option value="">Select Internship Type</option>
+            <option>Remote</option>
+            <option>Hybrid</option>
+            <option>On-site</option>
+          </select>
+          {errors.internshipType && (
+            <p className="mt-2 text-sm text-red-600">{errors.internshipType}</p>
+          )}
+        </div>
 
         {/* LINKS */}
 
@@ -280,24 +442,29 @@ export default function InternshipApplication() {
 
         <textarea
           rows={5}
-          name="experience"
-          value={formData.experience}
-          onChange={handleChange}
-          placeholder="Projects / Experience"
-          className="w-full rounded-2xl border border-slate-300 px-5 py-4 resize-none"
-        />
+            name="projectsExperience"
+            value={formData.projectsExperience}
+            onChange={handleChange}
+            placeholder="Projects / Experience"
+            required
+            className="w-full rounded-2xl border border-slate-300 px-5 py-4 resize-none"
+          />
+          {errors.projectsExperience && (
+            <p className="mt-2 text-sm text-red-600">{errors.projectsExperience}</p>
+          )}
 
         <textarea
           rows={6}
-          name="whyJoin"
-          value={formData.whyJoin}
+          name="whyJoinSSC"
+          value={formData.whyJoinSSC}
           onChange={handleChange}
-          placeholder="Cover Letter / Why do you want to join SSC?"
+          placeholder="Why Join SSC?"
           required
           className="w-full rounded-2xl border border-slate-300 px-5 py-4 resize-none"
         />
-
-        {/* SUBMIT */}
+        {errors.whyJoinSSC && (
+          <p className="mt-2 text-sm text-red-600">{errors.whyJoinSSC}</p>
+        )}
 
         <button
           type="submit"

@@ -1,8 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import { siteConfig } from "../../config/site";
-import { Header } from "@/components/ui/header";
-import { Footer } from "@/components/ui/footer";
-import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav";
 import "./globals.css";
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,9 +12,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-    metadataBase: new URL(
+  metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ||
-    "https://seemanchalsmartvyapaar.com"
+      "https://seemanchalsmartvyapaar.com"
   ),
   title: {
     default: siteConfig.name,
@@ -40,6 +37,9 @@ export const metadata = {
     type: "website",
   },
 };
+
+import { ToastProvider } from '@/components/ui/Toast';
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 export default function RootLayout({ children }) {
   return (
@@ -64,20 +64,16 @@ export default function RootLayout({ children }) {
                 "streetAddress": siteConfig.contact.address,
                 "addressLocality": "Araria",
                 "addressRegion": "Bihar",
-                "addressCountry": "IN"
-              }
-            })
+                "addressCountry": "IN",
+              },
+            }),
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col">
-        <Header />
-        <div className="flex-1">
-          {children}
-        </div>
-        <MobileBottomNav />
-        <Footer />
+      <body className="min-h-full">
+        <ToastProvider>{children}</ToastProvider>
       </body>
+      <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
     </html>
   );
 }

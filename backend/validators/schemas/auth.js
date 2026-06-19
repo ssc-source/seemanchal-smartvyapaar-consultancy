@@ -25,3 +25,13 @@ exports.changePasswordSchema = z.object({
   params: z.object({}).optional(),
   query: z.object({}).optional(),
 });
+
+exports.changePasswordInitialSchema = z.object({
+  body: z.object({
+    email: z.string().email(),
+    currentPassword: z.string().min(1),
+    newPassword: z.string().min(10),
+  }),
+  params: z.object({}).optional(),
+  query: z.object({}).optional(),
+});

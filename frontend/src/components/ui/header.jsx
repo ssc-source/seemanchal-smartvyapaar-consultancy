@@ -42,6 +42,12 @@ export async function Header() {
             Use Cases
           </Link>
           <Link
+            href="/future-skills"
+            className="text-slate-600 transition-colors hover:text-brand-accent"
+          >
+            Future Skills
+          </Link>
+          <Link
             href="/about"
             className="text-slate-600 transition-colors hover:text-brand-accent"
           >
@@ -59,14 +65,12 @@ export async function Header() {
           >
             Careers
           </Link>
-          
-
         </nav>
 
         {/* <div className="flex items-center gap-4">
           <CTA label="Get in Touch" href="/contact" size="sm" icon={false} />
         </div> */}
-        <div className="flex items-center gap-4 shrink-0">
+        <div className="flex items-center gap-6 shrink-0">
           <div className="whitespace-nowrap">
             <CTA
               label="Get in Touch"

@@ -9,6 +9,9 @@ const getAccessTokenFromRequest = (req) => {
   }
 
   const cookies = authUtils.parseCookies(req.headers.cookie);
+  if (req.originalUrl && req.originalUrl.startsWith('/api/admin')) {
+    return cookies.ssc_admin_access_token;
+  }
   return cookies.ssc_access_token;
 };
 
@@ -85,4 +88,31 @@ exports.requirePermission = (...permissions) => {
 
     return next();
   });
+};
+
+// Backward-compatible aliases used by routes
+exports.requireAuth = exports.protect;
+
+// requireAdmin: ensure request is authenticated and user has admin role
+exports.requireAdmin = (req, res, next) => {
+  const run = async () => {
+    await exports.protect(req, res, async () => {
+      const roleName = req.admin?.role || req.user?.role;
+      if (roleName === 'SUPER_ADMIN' || roleName === 'admin') {
+        return next();
+      }
+
+      await recordAudit({
+        userId: req.admin?.id || req.user?.id || null,
+        action: 'AUTHORIZATION_DENIED',
+        entityType: 'Authorization',
+        entityId: req.originalUrl,
+        newValue: { required: 'admin', role: roleName },
+        ipAddress: req.ip,
+      });
+
+      return res.status(403).json({ success: false, message: 'Admin access required', errors: [] });
+    });
+  };
+  run().catch((err) => next(err));
 };

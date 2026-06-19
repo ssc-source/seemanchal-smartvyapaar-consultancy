@@ -11,6 +11,11 @@ const settings = [
   { key: 'linkedinUrl', value: 'https://seemanchalsmartvyapaar.com' },
   { key: 'instagramUrl', value: 'https://www.instagram.com/seemanchalsmartvyapaar/' },
   { key: 'twitterUrl', value: 'https://www.instagram.com/seemanchalsmartvyapaar/' },
+  { key: 'assessment_price', value: '199' },
+  { key: 'currency', value: 'INR' },
+  { key: 'payment_enabled', value: 'true' },
+  { key: 'invoice_prefix', value: 'SSC' },
+  { key: 'refund_window_days', value: '7' },
 ];
 
 const contentPages = [

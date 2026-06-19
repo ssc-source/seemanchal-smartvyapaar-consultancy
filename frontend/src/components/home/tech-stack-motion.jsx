@@ -167,8 +167,8 @@ export default function TechStackMotion() {
       
       {/* BACKGROUND GLOW */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-120px] left-[-120px] h-[260px] w-[260px] rounded-full bg-blue-100 blur-3xl opacity-60" />
-        <div className="absolute bottom-[-120px] right-[-120px] h-[260px] w-[260px] rounded-full bg-cyan-100 blur-3xl opacity-60" />
+        <div className="absolute -top-30 -left-30 h-65 w-65 rounded-full bg-blue-100 blur-3xl opacity-60" />
+        <div className="absolute -bottom-30 -right-30 h-65 w-65 rounded-full bg-cyan-100 blur-3xl opacity-60" />
       </div>
 
       {/* HEADER */}
@@ -193,7 +193,7 @@ export default function TechStackMotion() {
             className="mt-5 text-3xl sm:text-4xl lg:text-6xl font-black leading-[1.1] tracking-tight text-slate-900"
           >
             Engineering
-            <span className="block bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+            <span className="block bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
               Modern Digital Systems
             </span>
           </motion.h2>
@@ -213,8 +213,8 @@ export default function TechStackMotion() {
       </div>
 
       {/* EDGE FADE */}
-      <div className="absolute left-0 top-0 z-10 h-full w-16 sm:w-24 bg-gradient-to-r from-[#f8fbff] to-transparent pointer-events-none" />
-      <div className="absolute right-0 top-0 z-10 h-full w-16 sm:w-24 bg-gradient-to-l from-[#f8fbff] to-transparent pointer-events-none" />
+      <div className="absolute left-0 top-0 z-10 h-full w-16 sm:w-24 bg-linear-to-r from-[#f8fbff] to-transparent pointer-events-none" />
+      <div className="absolute right-0 top-0 z-10 h-full w-16 sm:w-24 bg-linear-to-l from-[#f8fbff] to-transparent pointer-events-none" />
 
      {/* MOBILE GRID */}
 <div className="relative z-20 block md:hidden px-3">
@@ -277,15 +277,15 @@ export default function TechStackMotion() {
                   scale: 1.03,
                 }}
                 key={index}
-                className="group relative w-[220px] lg:w-[260px] flex-shrink-0 overflow-hidden rounded-[32px] border border-white/50 bg-white/80 backdrop-blur-xl p-8 lg:p-10 shadow-[0_10px_50px_rgba(0,0,0,0.08)] transition-all duration-500"
+                className="group relative w-55 lg:w-65 shrink-0 overflow-hidden rounded-4xl border border-white/50 bg-white/80 backdrop-blur-xl p-8 lg:p-10 shadow-[0_10px_50px_rgba(0,0,0,0.08)] transition-all duration-500"
               >
                 {/* HOVER GRADIENT */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-cyan-50 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <div className="absolute inset-0 bg-linear-to-br from-blue-50 via-white to-cyan-50 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
                 <div className="relative z-10 flex flex-col items-center text-center">
                   
                   <div
-                    className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-600 to-cyan-500 shadow-xl shadow-blue-200 transition-transform duration-500 group-hover:scale-110"
+                    className="flex h-20 w-20 items-center justify-center rounded-3xl bg-linear-to-br from-blue-600 to-cyan-500 shadow-xl shadow-blue-200 transition-transform duration-500 group-hover:scale-110"
                   >
                     <Icon className="h-10 w-10 text-white" />
                   </div>

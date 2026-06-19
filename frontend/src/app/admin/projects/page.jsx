@@ -26,7 +26,12 @@ export default function AdminProjects() {
   };
 
   useEffect(() => {
-    fetchProjects();
+    const loadProjects = async () => {
+      setIsLoading(true);
+      await fetchProjects();
+    };
+
+    loadProjects();
   }, []);
 
   const handleEdit = (project) => {

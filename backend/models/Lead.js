@@ -35,7 +35,7 @@ const Lead = sequelize.define('Lead', {
     allowNull: true,
   },
   status: {
-    type: DataTypes.ENUM('new', 'contacted', 'qualified', 'closed', 'lost'),
+    type: DataTypes.ENUM('new', 'contacted', 'interested', 'proposal_sent', 'converted', 'rejected', 'qualified', 'closed', 'lost'),
     defaultValue: 'new',
   },
   // Lead Source Tracking Fields

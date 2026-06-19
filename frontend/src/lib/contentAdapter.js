@@ -42,240 +42,334 @@ const parseMaybeObject = (value) => {
   return null;
 };
 
-export const contentAdapter = {
-  async resolveServices() {
-    try {
-      const liveServices = safeArray(await cms.getServices());
+const SETTINGS_RESOLVE_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const SETTINGS_ERROR_CACHE_TTL = 15 * 1000; // 15 seconds cache for errors to prevent retry storms
+let cachedResolvedSettings = null;
+let cachedResolvedSettingsExpiry = 0;
+let cachedSettingsError = null;
+let cachedSettingsErrorExpiry = 0;
+let resolvingSettingsPromise = null;
 
-      if (liveServices.length === 0) {
-        console.info('[CMS] No live services found, falling back to static.');
-        return content.services;
+// Timeout wrapper for API calls - fail gracefully after 2 seconds to prevent hanging
+const withTimeout = async (promise, timeoutMs = 2000) => {
+  let timeoutId;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error('API call timeout')), timeoutMs);
+  });
+  try {
+    const result = await Promise.race([promise, timeoutPromise]);
+    clearTimeout(timeoutId);
+    return result;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+};
+
+// Generic cache and deduplicator helper
+const makeCachedResolver = (fetchFn, fallbackValue, label, resolveTtl = 5 * 60 * 1000, errorTtl = 15 * 1000) => {
+  let cachedData = null;
+  let cachedExpiry = 0;
+  let cachedError = null;
+  let cachedErrorExpiry = 0;
+  let inFlightPromise = null;
+
+  return async (...args) => {
+    const now = Date.now();
+
+    // 1. Check if error is cached
+    if (cachedError && now < cachedErrorExpiry) {
+      console.info(`[CMS CACHE] Returning fallback for ${label} (error cached to prevent retry storm)`);
+      return fallbackValue;
+    }
+
+    // 2. Check if successful data is cached
+    if (cachedData && now < cachedExpiry) {
+      return cachedData;
+    }
+
+    // 3. Deduplicate in-flight requests
+    if (inFlightPromise) {
+      console.info(`[CMS DEDUP] Reusing in-flight request for ${label}`);
+      return inFlightPromise;
+    }
+
+    inFlightPromise = (async () => {
+      try {
+        const result = await fetchFn(...args);
+        cachedData = result;
+        cachedExpiry = now + resolveTtl;
+        cachedError = null;
+        cachedErrorExpiry = 0;
+        return result;
+      } catch (error) {
+        console.warn(`[CMS FALLBACK] ${label} failed:`, error.message);
+        cachedError = error;
+        cachedErrorExpiry = now + errorTtl;
+        // Cache the fallback so we don't try again immediately
+        cachedData = fallbackValue;
+        cachedExpiry = now + resolveTtl;
+        return fallbackValue;
+      } finally {
+        inFlightPromise = null;
       }
+    })();
 
-      const validServices = liveServices
-        .filter((s) => s && s.isActive !== false && s.title)
-        .map((s) => ({
-          id: s.slug || s.id,
-          slug: s.slug,
-          title: s.title,
-          description: s.shortDescription || s.fullDescription || '',
-          details: s.fullDescription || s.shortDescription || '',
-          icon: s.icon || 'Briefcase',
-          idealFor: parseMaybeJSON(s.idealFor),
-          outcomes: parseMaybeJSON(s.outcomes),
-          modules: parseMaybeJSON(s.modules),
-          isActive: s.isActive !== false,
-        }));
+    return inFlightPromise;
+  };
+};
 
-      console.info(`[CMS] Resolved ${validServices.length} live services.`);
-      return validServices.length > 0 ? validServices : content.services;
-    } catch (error) {
-      console.warn('[CMS FALLBACK] Services:', error.message);
+const cachedResolveServices = makeCachedResolver(
+  async () => {
+    const liveServices = safeArray(await withTimeout(cms.getServices()));
+    if (liveServices.length === 0) {
+      console.info('[CMS] No live services found, falling back to static.');
       return content.services;
     }
+    const validServices = liveServices
+      .filter((s) => s && s.isActive !== false && s.title)
+      .map((s) => ({
+        id: s.slug || s.id,
+        slug: s.slug,
+        title: s.title,
+        description: s.shortDescription || s.fullDescription || '',
+        details: s.fullDescription || s.shortDescription || '',
+        icon: s.icon || 'Briefcase',
+        idealFor: parseMaybeJSON(s.idealFor),
+        outcomes: parseMaybeJSON(s.outcomes),
+        modules: parseMaybeJSON(s.modules),
+        isActive: s.isActive !== false,
+      }));
+    console.info(`[CMS] Resolved ${validServices.length} live services.`);
+    return validServices.length > 0 ? validServices : content.services;
+  },
+  content.services,
+  'Services'
+);
+
+const cachedResolveProjects = makeCachedResolver(
+  async () => {
+    const liveProjects = safeArray(await withTimeout(cms.getProjects()));
+    if (liveProjects.length === 0) {
+      console.info('[CMS] No live projects found, falling back to static.');
+      return content.projects;
+    }
+    const firstStringValue = (...values) => values.find((value) => typeof value === 'string' && value.trim())?.trim();
+    const validProjects = liveProjects
+      .filter((p) => p && p.isActive !== false && p.title)
+      .map((p) => ({
+        id: p.slug || p.id,
+        slug: p.slug,
+        title: p.title,
+        category: p.category || 'General',
+        businessType: p.businessType || '',
+        clientName: p.clientName || '',
+        summary: p.summary || '',
+        problem: p.problem || '',
+        solution: p.solution || '',
+        outcome: p.outcome || '',
+        tools: parseMaybeJSON(p.tools),
+        href: firstStringValue(p.href, p.url, p.website) || `/projects/${p.slug}`,
+        image: p.featuredImage || p.image || '',
+        isActive: p.isActive !== false,
+      }));
+    console.info(`[CMS] Resolved ${validProjects.length} live projects.`);
+    return validProjects.length > 0 ? validProjects : content.projects;
+  },
+  content.projects,
+  'Projects'
+);
+
+const cachedResolveTestimonials = makeCachedResolver(
+  async () => {
+    const liveTestimonials = safeArray(await withTimeout(cms.getTestimonials()));
+    if (liveTestimonials.length === 0) {
+      console.info('[CMS] No live testimonials found, falling back to static.');
+      return content.testimonials;
+    }
+    const validTestimonials = liveTestimonials
+      .filter((t) => t && t.content && t.clientName)
+      .map((t) => ({
+        id: t.id,
+        quote: t.content,
+        author: t.clientName,
+        role: t.clientRole || '',
+        organization: t.companyName || '',
+        rating: t.rating || 5,
+        avatar: t.avatarUrl || '',
+        context: t.context || '',
+      }));
+    console.info(`[CMS] Resolved ${validTestimonials.length} live testimonials.`);
+    return validTestimonials.length > 0 ? validTestimonials : content.testimonials;
+  },
+  content.testimonials,
+  'Testimonials'
+);
+
+const cachedResolveHomepage = makeCachedResolver(
+  async () => {
+    const liveSections = await withTimeout(cms.getHomepageSections());
+    if (!liveSections || typeof liveSections !== 'object') {
+      throw new Error('Invalid homepage payload');
+    }
+    console.info('[CMS] Resolved live homepage sections.');
+    return {
+      hero: {
+        headline: liveSections.hero?.headline || content.hero.headline,
+        subheadline: liveSections.hero?.subheadline || content.hero.subheadline,
+        primaryCTA: {
+          label: liveSections.hero?.primaryCTA?.label || content.hero.primaryCTA.label,
+          href: liveSections.hero?.primaryCTA?.href || content.hero.primaryCTA.href,
+        },
+        secondaryCTA: {
+          label: liveSections.hero?.secondaryCTA?.label || content.hero.secondaryCTA.label,
+          href: liveSections.hero?.secondaryCTA?.href || content.hero.secondaryCTA.href,
+        },
+      },
+      stats: Array.isArray(liveSections.stats) && liveSections.stats.length ? liveSections.stats : content.stats,
+      useCases: Array.isArray(liveSections.useCases) && liveSections.useCases.length ? liveSections.useCases : content.useCases,
+      whyChooseUs: Array.isArray(liveSections.whyChooseUs) && liveSections.whyChooseUs.length ? liveSections.whyChooseUs : content.whyChooseUs,
+      implementationProcess: Array.isArray(liveSections.implementationProcess) && liveSections.implementationProcess.length ? liveSections.implementationProcess : content.implementationProcess,
+      faqs: Array.isArray(liveSections.faqs) && liveSections.faqs.length ? liveSections.faqs : content.faqs,
+    };
+  },
+  {
+    hero: content.hero,
+    stats: content.stats,
+    useCases: content.useCases,
+    whyChooseUs: content.whyChooseUs,
+    implementationProcess: content.implementationProcess,
+    faqs: content.faqs,
+  },
+  'Homepage'
+);
+
+const cachedResolveAbout = makeCachedResolver(
+  async () => {
+    const liveAboutPage = await withTimeout(cms.getContentPage('about'));
+    if (liveAboutPage && typeof liveAboutPage === 'object' && liveAboutPage.content) {
+      console.info('[CMS] Resolved live about content.');
+      const liveContent = liveAboutPage.content;
+      return {
+        about: {
+          story: liveContent.story || content.about.story,
+          mission: liveContent.mission || content.about.mission,
+          vision: liveContent.vision || content.about.vision,
+        },
+        stats: content.stats,
+        whyChooseUs: content.whyChooseUs,
+      };
+    }
+    throw new Error('Invalid about content payload');
+  },
+  {
+    about: content.about,
+    stats: content.stats,
+    whyChooseUs: content.whyChooseUs,
+  },
+  'About'
+);
+
+export const contentAdapter = {
+  async resolveServices() {
+    return cachedResolveServices();
   },
 
   async resolveProjects() {
-    try {
-      const liveProjects = safeArray(await cms.getProjects());
-
-      if (liveProjects.length === 0) {
-        console.info('[CMS] No live projects found, falling back to static.');
-        return content.projects;
-      }
-
-      const firstStringValue = (...values) => values.find((value) => typeof value === 'string' && value.trim())?.trim();
-
-      const validProjects = liveProjects
-        .filter((p) => p && p.isActive !== false && p.title)
-        .map((p) => ({
-          id: p.slug || p.id,
-          slug: p.slug,
-          title: p.title,
-          category: p.category || 'General',
-          businessType: p.businessType || '',
-          clientName: p.clientName || '',
-          summary: p.summary || '',
-          problem: p.problem || '',
-          solution: p.solution || '',
-          outcome: p.outcome || '',
-          tools: parseMaybeJSON(p.tools),
-          href: firstStringValue(p.href, p.url, p.website) || `/projects/${p.slug}`,
-          image: p.featuredImage || p.image || '',
-          isActive: p.isActive !== false,
-        }));
-
-      console.info(`[CMS] Resolved ${validProjects.length} live projects.`);
-      return validProjects.length > 0 ? validProjects : content.projects;
-    } catch (error) {
-      console.warn('[CMS FALLBACK] Projects:', error.message);
-      return content.projects;
-    }
+    return cachedResolveProjects();
   },
 
   async resolveSettings() {
-    try {
-      const liveSettings = await cms.getSettings();
-
-      if (!liveSettings || typeof liveSettings !== 'object') {
-        throw new Error('Invalid settings payload');
-      }
-
-      console.info('[CMS] Resolved live settings.');
-
-      return {
-        ...siteConfig,
-        name: liveSettings.siteName || siteConfig.name,
-        contact: {
-          ...siteConfig.contact,
-          email: liveSettings.email || liveSettings.contactEmail || siteConfig.contact.email,
-          phone: liveSettings.phone || liveSettings.contactPhone || siteConfig.contact.phone,
-          address: liveSettings.address || siteConfig.contact.address,
-        },
-        links: {
-          ...siteConfig.links,
-          facebook: liveSettings.facebookUrl || siteConfig.links.facebook,
-          linkedin: liveSettings.linkedinUrl || siteConfig.links.linkedin,
-          instagram: liveSettings.instagramUrl || siteConfig.links.instagram,
-          twitter: liveSettings.twitterUrl || siteConfig.links.twitter,
-        },
-      };
-    } catch (error) {
-      console.warn('[CMS FALLBACK] Settings:', error.message);
+    const now = Date.now();
+    
+    // Check if we have a cached error (prevent retry storms)
+    if (cachedSettingsError && now < cachedSettingsErrorExpiry) {
+      console.info('[CMS CACHE] Returning fallback (error cached to prevent retry storm)');
       return siteConfig;
     }
+    
+    // Check successful cache
+    if (cachedResolvedSettings && now < cachedResolvedSettingsExpiry) {
+      return cachedResolvedSettings;
+    }
+
+    // Only one concurrent resolution
+    if (resolvingSettingsPromise) {
+      console.info('[CMS DEDUP] Reusing in-flight settings request');
+      return resolvingSettingsPromise;
+    }
+
+    resolvingSettingsPromise = (async () => {
+      try {
+        const liveSettings = await withTimeout(cms.getSettings());
+
+        if (!liveSettings || typeof liveSettings !== 'object') {
+          throw new Error('Invalid settings payload');
+        }
+
+        console.info('[CMS] Resolved live settings.');
+
+        const resolved = {
+          ...siteConfig,
+          name: liveSettings.siteName || siteConfig.name,
+          contact: {
+            ...siteConfig.contact,
+            email: liveSettings.email || liveSettings.contactEmail || siteConfig.contact.email,
+            phone: liveSettings.phone || liveSettings.contactPhone || siteConfig.contact.phone,
+            address: liveSettings.address || siteConfig.contact.address,
+          },
+          links: {
+            ...siteConfig.links,
+            facebook: liveSettings.facebookUrl || siteConfig.links.facebook,
+            linkedin: liveSettings.linkedinUrl || siteConfig.links.linkedin,
+            instagram: liveSettings.instagramUrl || siteConfig.links.instagram,
+            twitter: liveSettings.twitterUrl || siteConfig.links.twitter,
+          },
+        };
+
+        cachedResolvedSettings = resolved;
+        cachedResolvedSettingsExpiry = now + SETTINGS_RESOLVE_CACHE_TTL;
+        
+        // Clear error cache on success
+        cachedSettingsError = null;
+        cachedSettingsErrorExpiry = 0;
+        
+        return resolved;
+      } catch (error) {
+        console.warn('[CMS FALLBACK] Settings:', error.message);
+        
+        // Cache the error to prevent immediate retries and request storms
+        cachedSettingsError = error;
+        cachedSettingsErrorExpiry = now + SETTINGS_ERROR_CACHE_TTL;
+        
+        // Also cache fallback
+        cachedResolvedSettings = siteConfig;
+        cachedResolvedSettingsExpiry = now + SETTINGS_RESOLVE_CACHE_TTL;
+        
+        return siteConfig;
+      } finally {
+        resolvingSettingsPromise = null;
+      }
+    })();
+
+    return resolvingSettingsPromise;
   },
 
   async resolveTestimonials() {
-    try {
-      const liveTestimonials = safeArray(await cms.getTestimonials());
-
-      if (liveTestimonials.length === 0) {
-        console.info('[CMS] No live testimonials found, falling back to static.');
-        return content.testimonials;
-      }
-
-      const validTestimonials = liveTestimonials
-        .filter((t) => t && t.content && t.clientName)
-        .map((t) => ({
-          id: t.id,
-          quote: t.content,
-          author: t.clientName,
-          role: t.clientRole || '',
-          organization: t.companyName || '',
-          rating: t.rating || 5,
-          avatar: t.avatarUrl || '',
-          context: t.context || '',
-        }));
-
-      console.info(`[CMS] Resolved ${validTestimonials.length} live testimonials.`);
-      return validTestimonials.length > 0 ? validTestimonials : content.testimonials;
-    } catch (error) {
-      console.warn('[CMS FALLBACK] Testimonials:', error.message);
-      return content.testimonials;
-    }
+    return cachedResolveTestimonials();
   },
 
   async resolveHomepage() {
-    try {
-      const liveSections = await cms.getHomepageSections();
-
-      if (!liveSections || typeof liveSections !== 'object') {
-        throw new Error('Invalid homepage payload');
-      }
-
-      console.info('[CMS] Resolved live homepage sections.');
-
-      return {
-        hero: {
-          headline:
-            liveSections.hero?.headline ||
-            content.hero.headline,
-          subheadline:
-            liveSections.hero?.subheadline ||
-            content.hero.subheadline,
-          primaryCTA: {
-            label:
-              liveSections.hero?.primaryCTA?.label ||
-              content.hero.primaryCTA.label,
-            href:
-              liveSections.hero?.primaryCTA?.href ||
-              content.hero.primaryCTA.href,
-          },
-          secondaryCTA: {
-            label:
-              liveSections.hero?.secondaryCTA?.label ||
-              content.hero.secondaryCTA.label,
-            href:
-              liveSections.hero?.secondaryCTA?.href ||
-              content.hero.secondaryCTA.href,
-          },
-        },
-        stats:
-          Array.isArray(liveSections.stats) && liveSections.stats.length
-            ? liveSections.stats
-            : content.stats,
-        useCases:
-          Array.isArray(liveSections.useCases) && liveSections.useCases.length
-            ? liveSections.useCases
-            : content.useCases,
-        whyChooseUs:
-          Array.isArray(liveSections.whyChooseUs) && liveSections.whyChooseUs.length
-            ? liveSections.whyChooseUs
-            : content.whyChooseUs,
-        implementationProcess:
-          Array.isArray(liveSections.implementationProcess) && liveSections.implementationProcess.length
-            ? liveSections.implementationProcess
-            : content.implementationProcess,
-        faqs:
-          Array.isArray(liveSections.faqs) && liveSections.faqs.length
-            ? liveSections.faqs
-            : content.faqs,
-      };
-    } catch (error) {
-      console.warn('[CMS FALLBACK] Homepage:', error.message);
-
-      return {
-        hero: content.hero,
-        stats: content.stats,
-        useCases: content.useCases,
-        whyChooseUs: content.whyChooseUs,
-        implementationProcess: content.implementationProcess,
-        faqs: content.faqs,
-      };
-    }
+    return cachedResolveHomepage();
   },
 
   async resolveAbout() {
-    try {
-      const liveAboutPage = await cms.getContentPage('about');
-      if (liveAboutPage && typeof liveAboutPage === 'object' && liveAboutPage.content) {
-        console.info('[CMS] Resolved live about content.');
-        const liveContent = liveAboutPage.content;
-        return {
-          about: {
-            story: liveContent.story || content.about.story,
-            mission: liveContent.mission || content.about.mission,
-            vision: liveContent.vision || content.about.vision,
-          },
-          stats: content.stats,
-          whyChooseUs: content.whyChooseUs,
-        };
-      }
-      throw new Error('Invalid about content payload');
-    } catch (error) {
-      console.warn('[CMS FALLBACK] About:', error.message);
-      return {
-        about: content.about,
-        stats: content.stats,
-        whyChooseUs: content.whyChooseUs,
-      };
-    }
+    return cachedResolveAbout();
   },
 
   async resolveCareerOpenings(fallbackOpenings = []) {
     try {
-      const liveOpenings = safeArray(await cms.getCareerOpenings());
+      const liveOpenings = safeArray(await withTimeout(cms.getCareerOpenings()));
       if (liveOpenings.length === 0) {
         console.info('[CMS] No live career openings found, falling back to static.');
         return fallbackOpenings;
@@ -316,7 +410,7 @@ export const contentAdapter = {
 
   async resolveCommunity({ fallbackGroups = [], fallbackEvents = [] } = {}) {
     try {
-      const liveItems = safeArray(await cms.getCommunityItems());
+      const liveItems = safeArray(await withTimeout(cms.getCommunityItems()));
       if (liveItems.length === 0) {
         console.info('[CMS] No live community items found, falling back to static.');
         return { communities: fallbackGroups, events: fallbackEvents };
@@ -355,7 +449,7 @@ export const contentAdapter = {
 
   async getPrivacyPolicy() {
     try {
-      const livePrivacy = parseMaybeObject(await cms.getPrivacyPolicy());
+      const livePrivacy = parseMaybeObject(await withTimeout(cms.getPrivacyPolicy(), 5000));
 
       if (!livePrivacy) {
         throw new Error('Invalid privacy policy payload');
@@ -390,7 +484,7 @@ export const contentAdapter = {
   },
   async getTermsOfService() {
     try {
-      const liveTerms = parseMaybeObject(await cms.getTermsOfService());
+      const liveTerms = parseMaybeObject(await withTimeout(cms.getTermsOfService(), 5000));
 
       if (!liveTerms) {
         throw new Error('Invalid terms of service payload');

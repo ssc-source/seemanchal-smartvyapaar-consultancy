@@ -133,6 +133,10 @@ export async function Footer() {
                 {link.label}
               </Link>
             ))}
+
+            <a href="/refundpolicy" className="font-medium transition-colors hover:text-brand-accent">
+              Refund Policy
+            </a>
           </div>
         </div>
       </div>

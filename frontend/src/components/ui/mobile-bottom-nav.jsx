@@ -102,6 +102,7 @@ import {
   Briefcase,
   FolderKanban,
   Info,
+  Rocket,
   Users,
   Newspaper,
   BadgeCent,
@@ -111,20 +112,21 @@ const navItems = [
   { label: "Home", href: "/", icon: Home },
   { label: "Services", href: "/services", icon: Briefcase },
   { label: "Projects", href: "/projects", icon: FolderKanban },
+  { label: "Future Skills", href: "/future-skills", icon: Rocket },
+  { label: "Career", href: "/career", icon: BadgeCent },
   { label: "About", href: "/about", icon: Info },
   { label: "Community", href: "/community", icon: Users },
   { label: "Blog", href: "/blog", icon: Newspaper },
-  { label: "Career", href: "/career", icon: BadgeCent },
 ];
 
-export function MobileBottomNav() {
+export function MobileBottomNavClient() {
   const pathname = usePathname();
 
   return (
     <div className="fixed inset-x-0 bottom-3 z-50 flex justify-center px-3 md:hidden">
       <div className="w-full max-w-md overflow-hidden rounded-3xl border border-amber-500 bg-white/90 backdrop-blur-2xl shadow-[0_10px_40px_rgba(15,23,42,0.12)]">
         
-        <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide px-2 py-2 scroll-smooth snap-x snap-mandatory">
+        <nav className="flex items-center gap-1 overflow-x-auto scrollbar-visible px-2 py-2 scroll-smooth snap-x snap-mandatory">
           
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -141,8 +143,8 @@ export function MobileBottomNav() {
                 prefetch={false}
                 className={
                   isActive
-                    ? "snap-center shrink-0 min-w-[72px] flex flex-col items-center justify-center rounded-2xl px-3 py-2 transition-all duration-300 bg-blue-600 text-white shadow-lg"
-                    : "snap-center shrink-0 min-w-[72px] flex flex-col items-center justify-center rounded-2xl px-3 py-2 transition-all duration-300 text-slate-500 hover:bg-slate-100"
+                    ? "snap-center shrink-0 w-20 flex flex-col items-center justify-center rounded-2xl px-3 py-2 transition-all duration-300 bg-blue-600 text-white shadow-lg"
+                    : "snap-center shrink-0 w-20 flex flex-col items-center justify-center rounded-2xl px-3 py-2 transition-all duration-300 text-slate-500 hover:bg-slate-100"
                 }
               >
                 <Icon className="mb-1 h-4 w-4" />

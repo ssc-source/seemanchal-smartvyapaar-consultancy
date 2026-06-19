@@ -1,28 +1,38 @@
-const getApiBaseUrl = () => {
-  if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:5000';
-  }
+import { API_BASE_URL } from './api';
+import { siteConfig } from "../../config/site";
 
-  const raw = process.env.NEXT_PUBLIC_API_URL || '';
-  if (typeof raw === 'string' && raw.trim()) {
-    return raw.trim().replace(/\/$/, '');
-  }
+const API_BASE = API_BASE_URL;
 
-  return 'http://localhost:5000';
-};
+const SETTINGS_CACHE_TTL = 30 * 1000;
+let cachedSettings = null;
+let cachedSettingsExpiry = 0;
+let settingsRequestPromise = null;
 
 class CmsClient {
   async fetchApi(endpoint) {
-    const response = await fetch(`${getApiBaseUrl()}${endpoint}`, {
-      next: { revalidate: 60 } // Revalidate every 60 seconds (Next.js App Router cache)
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
     
-    if (!response.ok) {
-      throw new Error(`CMS API Error: ${response.status}`);
+    try {
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        next: { revalidate: 3600 },
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`CMS API Error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.data; // Assumes our API always returns { success: true, data: [...] }
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error(`CMS API timeout after 5s: ${endpoint}`);
+      }
+      throw error;
     }
-    
-    const data = await response.json();
-    return data.data; // Assumes our API always returns { success: true, data: [...] }
   }
 
   async getServices() {
@@ -34,7 +44,29 @@ class CmsClient {
   }
 
   async getSettings() {
-    return this.fetchApi('/api/settings');
+    const now = Date.now();
+
+    if (cachedSettings && now < cachedSettingsExpiry) {
+      return cachedSettings;
+    }
+
+    if (settingsRequestPromise) {
+      return settingsRequestPromise;
+    }
+
+    settingsRequestPromise = this.fetchApi('/api/settings')
+      .then((data) => {
+        cachedSettings = data;
+        cachedSettingsExpiry = Date.now() + SETTINGS_CACHE_TTL;
+        settingsRequestPromise = null;
+        return cachedSettings;
+      })
+      .catch((error) => {
+        settingsRequestPromise = null;
+        throw error;
+      });
+
+    return settingsRequestPromise;
   }
 
   async getTestimonials() {

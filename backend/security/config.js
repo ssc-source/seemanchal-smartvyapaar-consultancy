@@ -8,11 +8,13 @@ const allowedOrigins = [
   'https://www.seemanchalsmartvyapaar.com',
 ].filter(Boolean);
 
+const localOriginRegex = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
+
 exports.allowedOrigins = allowedOrigins;
 
 exports.corsOptions = {
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin) || localOriginRegex.test(origin)) {
       return callback(null, true);
     }
     return callback(new Error('CORS not allowed'));

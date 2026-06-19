@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useToast } from '@/components/ui/Toast';
 
 import { api } from "@/lib/api";
 
@@ -18,6 +19,7 @@ export default function CommunityApplication() {
   const [submitted, setSubmitted] = useState(false);
 
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -56,7 +58,13 @@ export default function CommunityApplication() {
 
       console.error(error);
 
-      alert("Failed to submit application");
+      if (toast && toast.error) {
+        toast.error('Failed to submit application');
+      } else if (typeof window !== 'undefined' && window.__TOAST_FALLBACK__) {
+        window.__TOAST_FALLBACK__('Failed to submit application');
+      } else {
+        alert('Failed to submit application');
+      }
 
     } finally {
 
@@ -69,7 +77,7 @@ export default function CommunityApplication() {
   if (submitted) {
 
     return (
-      <div className="rounded-[32px] border border-slate-200 bg-white p-16 text-center shadow-xl">
+      <div className="rounded-4xl border border-slate-200 bg-white p-16 text-center shadow-xl">
 
         <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-green-100">
           <Users className="h-10 w-10 text-green-600" />

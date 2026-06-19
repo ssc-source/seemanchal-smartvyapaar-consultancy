@@ -91,3 +91,26 @@ body {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+
+/* Visible subtle horizontal scrollbar for scrollable mobile nav */
+.scrollbar-visible {
+  scrollbar-color: rgba(148, 163, 184, 0.5) transparent;
+  scrollbar-width: thin;
+}
+
+.scrollbar-visible::-webkit-scrollbar {
+  height: 8px;
+}
+
+.scrollbar-visible::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-visible::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 9999px;
+}
+
+.scrollbar-visible:hover::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.7);
+}

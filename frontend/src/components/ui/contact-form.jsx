@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { api } from "@/lib/api";
+import { API_BASE_URL } from "@/lib/api";
 import { Loader2, CheckCircle2 } from "lucide-react";
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -12,7 +13,7 @@ if (typeof window !== 'undefined') {
   console.log('═══════════════════════════════════════════════════════════');
   console.log('🔵 [ContactForm] Component Module Loaded');
   console.log('═══════════════════════════════════════════════════════════');
-  console.log('API_BASE_URL:', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000');
+  console.log('API_BASE_URL:', API_BASE_URL);
   console.log('Environment:', process.env.NODE_ENV);
   console.log('Timestamp:', new Date().toISOString());
   console.log('═══════════════════════════════════════════════════════════');
@@ -20,8 +21,8 @@ if (typeof window !== 'undefined') {
 
 // Controlled form initial schema (no external validators)
 
-export function ContactForm({ services }) {
-  console.log('🟢 [ContactForm] Component rendering. Services:', services?.length || 0);
+export function ContactForm({ services = [], initialService = "" }) {
+  console.log('🟢 [ContactForm] Component rendering. Services:', services?.length || 0, 'initialService:', initialService);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -35,7 +36,7 @@ export function ContactForm({ services }) {
     businessType: "",
     projectGoal: "",
     urgency: "",
-    serviceOfInterest: "",
+    serviceOfInterest: initialService,
     message: "",
   };
 
@@ -95,12 +96,6 @@ export function ContactForm({ services }) {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    await submitForm();
-  };
-
-  const handleButtonClick = async (e) => {
-    e.preventDefault();
-    console.log('📝 [ContactForm] Button click intercept fired');
     await submitForm();
   };
 
@@ -255,14 +250,13 @@ export function ContactForm({ services }) {
           onChange={handleChange}
           rows={4}
           required
-          className="w-full flex min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="w-full flex min-h-25 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           placeholder="Tell us about your project requirements..."
         />
       </div>
 
       <button 
         type="submit"
-        onClick={handleButtonClick}
         disabled={isSubmitting}
         className="w-full bg-brand-primary text-white h-12 rounded-md font-medium hover:bg-brand-primary/90 transition-colors flex items-center justify-center disabled:opacity-70"
       >
