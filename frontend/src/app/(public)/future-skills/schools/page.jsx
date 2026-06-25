@@ -256,7 +256,7 @@ export default function SchoolsPage() {
       </section>
 
       {/* Contact Footer */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-slate-50 border-t border-slate-200">
+      {/* <section className="py-16 px-4 sm:px-6 lg:px-8 bg-slate-50 border-t border-slate-200">
         <div className="max-w-4xl mx-auto text-center">
           <h3 className="text-2xl font-bold text-slate-900 mb-4">Have Questions?</h3>
           <p className="text-slate-600 mb-6">
@@ -265,7 +265,7 @@ export default function SchoolsPage() {
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <div>
               <p className="text-sm text-slate-600">Phone</p>
-              <p className="text-lg font-semibold text-slate-900">6201371593</p>
+              <p className="text-lg font-semibold text-slate-900">+91 6453356884</p>
             </div>
             <div>
               <p className="text-sm text-slate-600">Email</p>
@@ -277,7 +277,7 @@ export default function SchoolsPage() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }
