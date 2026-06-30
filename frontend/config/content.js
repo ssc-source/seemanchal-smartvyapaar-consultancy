@@ -112,7 +112,7 @@ export const content = {
       outcome: "3x increase in qualified corporate leads and immediate elevation in perceived brand value.",
       tools: ["Next.js", "Tailwind CSS", "Framer Motion"],
       image: "/assets/proof/rj.png",
-      href: "https://rjconcept-frontend.vercel.app" 
+      href: "https://rjconcept.in" 
     },
     { 
       id: "rpl-araria", 
