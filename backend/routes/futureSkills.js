@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const futureSkillsController = require('../controllers/futureSkillsController');
+const proposalController = require('../controllers/proposalController');
 const { FutureSkillFAQ, FutureSkillProgram } = require('../models');
 
 // Validation middleware for inquiry
@@ -33,6 +34,18 @@ const validateInquiry = [
 
 // POST /api/future-skills/inquiry - Create inquiry
 router.post('/inquiry', validateInquiry, futureSkillsController.createInquiry);
+
+// Validation middleware for proposal
+const validateProposal = [
+  body('schoolName').notEmpty().withMessage('School name is required').trim(),
+  body('principalName').notEmpty().withMessage('Principal name is required').trim(),
+  body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
+  body('phone').notEmpty().withMessage('Phone number is required').trim(),
+  body('schoolAddress').notEmpty().withMessage('School address is required').trim(),
+];
+
+// POST /api/future-skills/proposal - Generate and download school proposal
+router.post('/proposal', validateProposal, proposalController.generateProposal);
 
 // GET /api/future-skills/faqs - Get all FAQs
 router.get('/faqs', async (req, res) => {

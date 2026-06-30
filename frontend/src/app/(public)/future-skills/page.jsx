@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { api } from '@/lib/api';
 import DemoRequestForm from '@/components/future-skills/DemoRequestForm';
+import ProposalButtonWrapper from '@/components/future-skills/ProposalButtonWrapper';
 import PillarCard from '@/components/future-skills/PillarCard';
 import BenefitCard from '@/components/future-skills/BenefitCard';
 import FAQAccordion from '@/components/future-skills/FAQAccordion';
@@ -299,9 +300,7 @@ export default async function FutureSkillsPage() {
             <Link href="/future-skills/schools" className="px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold hover:bg-slate-100 transition">
               Request School Demo
             </Link>
-            <button className="px-8 py-4 border-2 border-white text-white rounded-lg font-semibold hover:bg-blue-700 transition">
-              Download Proposal
-            </button>
+            <ProposalButtonWrapper variant="outline" />
           </div>
         </div>
       </section>

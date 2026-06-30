@@ -258,6 +258,50 @@ async submitFutureSkillsInquiry(data) {
 },
 
 /**
+ * Submit school details to generate and download a partnership proposal PDF
+ * @param {Object} data - Proposal form data
+ * @returns {Promise<Blob>}
+ */
+async submitFutureSkillsProposal(data) {
+  const url = `${API_BASE_URL}/api/future-skills/proposal`;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+
+  console.log('🟦 [API.submitFutureSkillsProposal] Starting proposal generation...', {
+    schoolName: data.schoolName,
+    email: data.email
+  });
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      let errorMsg = 'Failed to generate proposal';
+      try {
+        const result = await response.json();
+        errorMsg = result.message || result.errors?.[0]?.msg || errorMsg;
+      } catch (_) {}
+      throw new Error(errorMsg);
+    }
+
+    const blob = await response.blob();
+    console.log('✅ [API.submitFutureSkillsProposal] SUCCESS', { size: blob.size });
+    return blob;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    console.error('🟥 [API.submitFutureSkillsProposal] Error:', error.message);
+    throw error;
+  }
+},
+
+/**
  * Get all Future Skills Lab FAQs
  * @returns {Promise<Object>}
  */

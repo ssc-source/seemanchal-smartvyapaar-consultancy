@@ -74,6 +74,20 @@ const FutureSkillInquiry = sequelize.define('FutureSkillInquiry', {
     defaultValue: 'website',
     allowNull: true,
   },
+  proposalDownloaded: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false,
+  },
+  proposalDownloadedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  proposalDownloadCount: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    allowNull: false,
+  },
 }, {
   timestamps: true,
   tableName: 'future_skill_inquiries',

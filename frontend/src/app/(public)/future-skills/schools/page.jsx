@@ -1,6 +1,6 @@
-import Link from 'next/link';
-import { CheckCircle, ArrowRight } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import DemoRequestForm from '@/components/future-skills/DemoRequestForm';
+import ProposalButtonWrapper from '@/components/future-skills/ProposalButtonWrapper';
 
 export const metadata = {
   title: 'School Partnership Program | SSC Future Skills Lab',
@@ -16,9 +16,12 @@ export default function SchoolsPage() {
           <h1 className="text-5xl sm:text-6xl font-bold text-slate-900 mb-6">
             School Partnership Program
           </h1>
-          <p className="text-xl text-slate-600">
+          <p className="text-xl text-slate-600 mb-8">
             Transform your school with industry-led future skills education
           </p>
+          <div className="flex justify-center">
+            <ProposalButtonWrapper variant="hero" />
+          </div>
         </div>
       </section>
 
@@ -30,7 +33,7 @@ export default function SchoolsPage() {
             <div>
               <h3 className="text-xl font-semibold mb-3">📚 Student Needs</h3>
               <p className="text-slate-300 leading-relaxed">
-                Today's students need future skills beyond traditional academics. They need AI literacy, digital citizenship, innovation thinking, and career awareness to thrive in tomorrow's world.
+                Today&apos;s students need future skills beyond traditional academics. They need AI literacy, digital citizenship, innovation thinking, and career awareness to thrive in tomorrow&apos;s world.
               </p>
             </div>
             <div>
@@ -242,8 +245,11 @@ export default function SchoolsPage() {
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Become a Partner School?</h2>
           <p className="text-lg mb-8 opacity-90">
-            Fill out the form below and our team will contact you within 24 hours with a customized proposal.
+            Fill out the form below and our team will contact you within 24 hours, or download a customized proposal instantly.
           </p>
+          <div className="flex justify-center">
+            <ProposalButtonWrapper variant="cta" />
+          </div>
         </div>
       </section>
 

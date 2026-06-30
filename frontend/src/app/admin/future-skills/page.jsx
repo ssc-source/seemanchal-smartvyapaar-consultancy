@@ -139,7 +139,14 @@ export default function AdminFutureSkills() {
                       </span>
                     </div>
                     <p className="text-sm text-slate-500 truncate">{inquiry.city}, {inquiry.state}</p>
-                    <p className="text-xs text-slate-400 mt-2">{new Date(inquiry.createdAt).toLocaleString()}</p>
+                    <div className="flex justify-between items-center mt-2">
+                      <p className="text-xs text-slate-400">{new Date(inquiry.createdAt).toLocaleString()}</p>
+                      {inquiry.proposalDownloaded && (
+                        <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md font-medium border border-blue-100">
+                          📄 Downloaded ({inquiry.proposalDownloadCount})
+                        </span>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -188,6 +195,28 @@ export default function AdminFutureSkills() {
                 <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Source</p>
                 <p className="text-sm text-slate-800">{selectedInquiry.source || 'website'}</p>
               </div>
+              <div className="rounded-2xl bg-slate-50 p-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Proposal Downloaded</p>
+                <p className="text-sm text-slate-800 font-medium">
+                  {selectedInquiry.proposalDownloaded ? (
+                    <span className="text-green-700 bg-green-50 px-2.5 py-0.5 rounded-full text-xs font-semibold border border-green-100">Yes</span>
+                  ) : (
+                    <span className="text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full text-xs font-semibold">No</span>
+                  )}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-slate-50 p-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Proposal Download Count</p>
+                <p className="text-sm text-slate-800 font-semibold">{selectedInquiry.proposalDownloadCount ?? 0}</p>
+              </div>
+              {selectedInquiry.proposalDownloaded && (
+                <div className="rounded-2xl bg-slate-50 p-4 col-span-2">
+                  <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Proposal Last Downloaded At</p>
+                  <p className="text-sm text-slate-800">
+                    {selectedInquiry.proposalDownloadedAt ? new Date(selectedInquiry.proposalDownloadedAt).toLocaleString() : 'N/A'}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="space-y-4">
